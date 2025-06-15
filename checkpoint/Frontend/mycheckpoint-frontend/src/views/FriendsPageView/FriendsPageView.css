@@ -1,0 +1,183 @@
+/* --- VISTA GENERAL --- */
+.friends-page-view {
+    max-width: 800px;
+    margin: 1rem auto;
+    padding: 1rem;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--color-heading);
+}
+
+/* --- PESTAÑAS DE NAVEGACIÓN --- */
+.tabs-navigation {
+    display: flex;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 1.5rem;
+}
+
+.tabs-navigation button {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background-color: transparent;
+    color: var(--color-text-light-2);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap; /* Evita que el texto del botón se parta */
+}
+
+.tabs-navigation button:hover {
+    color: var(--color-text);
+}
+
+.tabs-navigation button.active-tab {
+    color: var(--color-heading);
+    border-bottom-color: var(--color-rosa-hover);
+}
+
+/* --- MENSAJES DE ESTADO (CARGA, ERROR, VACÍO) --- */
+.loading-message, .error-message, .empty-message {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    background-color: var(--color-background-soft);
+    border-radius: 8px;
+}
+
+.error-message {
+    color: #d8000c;
+    background-color: #ffbaba;
+}
+
+/* --- LISTA DE USUARIOS --- */
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.user-list-item {
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--color-background-soft);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.user-list-item:hover {
+    background-color: #21bbd662;
+}
+
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: var(--color-text);
+    font-weight: 500;
+    min-width: 0;
+    flex-grow: 1;
+}
+.user-info:hover {
+    background: transparent !important;
+}
+
+.user-info span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-avatar-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0; 
+}
+
+.user-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0; 
+    z-index: 10;
+}
+
+/* --- BOTONES DE ACCIÓN --- */
+.action-button.small {
+    padding: 0.4em 0.8em;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: 1px solid transparent; 
+}
+
+.action-button.primary {
+    background-color: hsla(160, 100%, 37%, 1); 
+    color: white;
+    border-color: hsla(160, 100%, 37%, 1);
+}
+.action-button.primary:hover:not(:disabled) { background-color: hsla(160, 100%, 30%, 1); }
+
+.action-button.secondary {
+    background-color: rgb(177, 43, 43); 
+    color: var(--color-text);
+    border: 1px solid var(--color-border-hover);
+}
+.action-button.secondary:hover:not(:disabled) { background-color: rgb(114, 24, 24); }
+
+.action-button.danger {
+    background-color: #d9534f; 
+    color: white;
+    border-color: #d43f3a;
+}
+.action-button.danger:hover:not(:disabled) { background-color: #c9302c; }
+
+
+/* ------------------------------------------- */
+/* --- ESTILOS PARA DISPOSITIVOS MÓVILES --- */
+/* ------------------------------------------- */
+@media (max-width: 767px) {
+    
+    /* 1. La vista principal tiene menos padding lateral */
+    .friends-page-view {
+        padding: 1rem 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    /* 2. Las pestañas se hacen deslizables horizontalmente */
+    .tabs-navigation {
+        overflow-x: auto;
+        /* Ocultamos la barra de scroll para un look más limpio */
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    .tabs-navigation::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, and Opera */
+    }
+
+    /* 3. Las filas de usuario se apilan para dar más espacio */
+    .user-list-item {
+        flex-direction: column;
+        align-items: flex-start; /* Alineamos todo a la izquierda */
+        gap: 0.75rem; /* Espacio entre el usuario y los botones */
+    }
+
+    .user-actions {
+        width: 100%; /* Ocupan todo el ancho */
+        justify-content: flex-end; /* Alineamos los botones a la derecha */
+    }
+}

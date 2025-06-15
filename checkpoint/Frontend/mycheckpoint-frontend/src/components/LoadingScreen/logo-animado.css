@@ -1,0 +1,64 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #181818;
+    z-index: 9999;
+}
+
+.illustration {
+    display: block;
+    width: 30%;
+    margin: 60px auto;
+}
+
+#circuloEfectoCargar {
+    display: none;
+}
+
+
+#circulo-animado {
+
+    animation: efectoCarga 3s ease-in-out forwards;
+}
+
+@keyframes efectoCarga {
+
+    /* Estado inicial: el círculo no tiene radio, es invisible. */
+    from {
+        r: 0;
+    }
+
+    /* Estado final: el círculo tiene un radio enorme que cubre todo el SVG. */
+    to {
+        r: 1000;
+    }
+}
+
+#circulo-animado2 {
+    animation: efectoCarga2 1.6s ease-in-out infinite;
+}
+
+@keyframes efectoCarga2 {
+
+    /* Estado inicial: el círculo no tiene radio, es invisible. */
+    from {
+        r: 0;
+    }
+
+    /* Estado final: el círculo tiene un radio enorme que cubre todo el SVG. */
+    to {
+        r: 1000;
+    }
+}

@@ -1,0 +1,19 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.illustration {
+    display: block;
+    width: auto;
+
+    cursor: pointer;
+}
+
+/* Apuntamos al PATH y le asignamos la transición. (Esto no cambia) */
+#Vector_9 {
+  transition: fill 0.3s ease-in-out;
+}
+
+

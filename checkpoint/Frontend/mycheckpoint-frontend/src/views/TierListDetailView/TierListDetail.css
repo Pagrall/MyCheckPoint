@@ -1,0 +1,770 @@
+/* --- Layout General y Mensajes --- */
+.edit-tierlist-view {
+  padding: 3rem 0;
+}
+
+.tierlist-header-section.section-block,
+.tier-maker-container.section-block {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--color-background-soft);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.tierlist-header-section.section-block:last-child,
+.tier-maker-container.section-block:last-child {
+    margin-bottom: 0;
+}
+
+.loading-message, .error-message {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.error-message {
+    color: #d8000c;
+    background-color: #ffbaba;
+    border-radius: 4px;
+}
+
+/* --- Cabecera de la Tier List --- */
+.header-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.header-info h1 {
+    font-size: 2rem;
+    color: var(--color-heading);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+}
+
+.list-description-detail {
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+}
+
+.list-description-detail-empty {
+    font-style: italic;
+    color: var(--color-text-light-2);
+    margin-bottom: 1rem;
+}
+
+.list-meta-detail {
+    font-size: 0.9rem;
+    color: var(--color-text-light-2);
+}
+
+.list-meta-detail a {
+    color: hsla(160, 100%, 37%, 1);
+    text-decoration: none;
+}
+
+.list-meta-detail a:hover {
+    text-decoration: underline;
+    background: transparent;
+}
+
+.list-meta-detail .status-chip {
+    font-size: 0.8rem;
+    padding: 0.2em 0.6em;
+    border-radius: 10px;
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.list-meta-detail .status-chip.public {
+    background-color: hsla(160, 100%, 37%, 0.15);
+    color: hsla(160, 100%, 30%, 1);
+    border: 1px solid hsla(160, 100%, 37%, 0.3);
+}
+
+.list-meta-detail .status-chip.private {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: #c94040;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.meta-separator {
+    margin: 0 0.5em;
+}
+
+.header-actions-tierlist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* --- Creador de Tiers --- */
+.add-section-controls {
+    margin-bottom: 1.5rem;
+    text-align: right;
+}
+
+.tier-row {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    min-height: 100px;
+}
+
+.unclassified-tier-row {
+    margin-top: 2rem;
+    border-style: dashed;
+}
+
+/* --- Eliminador de Tier --- */
+.tier-row-delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: transparent;
+  border: none;
+  border-left: 1px solid var(--color-border-hover);
+  padding: 0 1rem;
+  color: #c94040;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.tier-row-delete-button img {
+  filter: invert(32%) sepia(72%) saturate(1231%) hue-rotate(325deg) brightness(87%) contrast(119%);
+  transition: filter 0.3s ease;
+}
+
+.tier-row-delete-button:hover img {
+  filter: brightness(0) invert(1);
+}
+
+.tier-row-delete-button:hover {
+  background-color: #c94040;
+}
+
+/* --- Etiquetas de Tier (S, A, B...) --- */
+.tier-label {
+  width: 140px;
+  min-width: 140px;
+  padding: 0.5rem 2rem 0.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: bold;
+  color: rgb(0, 0, 0);
+  border-right: 1px solid var(--color-border-hover);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  position: relative;
+  overflow-wrap: break-word;
+  word-break:break-all;
+}
+
+.tier-row .tier-label span {
+  font-weight: 600;
+}
+
+.tier-label .section-name-input {
+    width: 90%;
+    font-size: 1.2rem;
+    text-align: center;
+    border: 1px dashed #fff;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: rgb(0, 0, 0);
+}
+
+.unclassified-label {
+    background-color: var(--color-background-mute) !important;
+    color: var(--color-text-light-2);
+    font-size: 1rem;
+    font-style: italic;
+    word-break:normal;
+}
+
+.tier-label .tier-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tier-label .icon-button {
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    line-height: 1;
+    position: relative;
+}
+
+.tier-label .icon-button:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.color-input-hidden {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* --- Área de Juegos en cada Tier --- */
+.tier-items-droppable-area {
+    flex-grow: 1;
+    padding: 0.5rem;
+    background-color: rgba(0,0,0,0.02);
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    min-height: 90px;
+    transition: background-color 0.2s;
+}
+
+.tier-empty-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 80px;
+    color: var(--color-text-light-2);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.tier-items-grid-horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.tier-items-grid-horizontal .tier-item-compact {
+    flex: 0 0 100px;
+    background-color: var(--color-background);
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    cursor: grab;
+    position: relative;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.tier-item-compact a {
+    display: block;
+    text-decoration: none;
+    padding: 0;
+}
+
+.tier-item-cover-compact {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    display: block;
+    background-color: var(--color-background-soft);
+}
+
+.remove-item-button-compact {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: rgba(200, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.tier-item-compact:hover .remove-item-button-compact {
+    opacity: 1;
+}
+
+.remove-item-button-compact:hover {
+    background-color: red;
+}
+
+/* --- Estilos Drag & Drop --- */
+.tier-items-droppable-area.drag-over-active {
+  background-color: hsla(160, 100%, 37%, 0.1) !important;
+  border: 2px dashed hsla(160, 100%, 37%, 0.8) !important;
+}
+
+.tier-item-compact.dragging-item {
+  opacity: 0.4;
+  transform: scale(0.95);
+}
+
+.tier-item-compact.drag-over-item-target {
+  position: relative;
+}
+
+.tier-item-compact.drag-over-item-target::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background-color: hsla(160, 100%, 37%, 1);
+  border-radius: 3px;
+}
+
+/* --- Estilos para Modales (Unificado) --- */
+.library-game-cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+  background-color: var(--color-background-soft);
+  border-radius: 10px 10px 0 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-panel {
+  background-color: var(--color-background-soft);
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.35);
+  width: 90%;
+  max-width: 550px;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.add-games-modal-panel {
+    max-width: 700px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--color-heading);
+    font-weight: 600;
+}
+
+.modal-close-button {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--color-text-light-2);
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.modal-close-button:hover {
+    color: var(--color-text);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.modal-footer .action-message {
+  flex-grow: 1;
+  text-align: left;
+  font-size: 0.9em;
+  margin-right: 1rem;
+}
+
+/* Formularios dentro de Modales */
+.modal-panel form .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.modal-panel form .form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.modal-panel form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.modal-panel form input[type="text"], .modal-panel form textarea, .modal-panel form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-panel form input[type="text"]:focus, .modal-panel form textarea:focus {
+  outline: none;
+  border-color: hsla(160, 100%, 37%, 1);
+  box-shadow: 0 0 0 2px hsla(160, 100%, 37%, 0.2);
+}
+
+.modal-panel form .checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+
+.modal-panel form .checkbox-group input[type="checkbox"] {
+    margin-right: 0.6rem;
+    width: auto;
+    transform: scale(1.1);
+    accent-color: hsla(160, 100%, 37%, 1);
+}
+
+.modal-panel form .checkbox-group label {
+    margin-bottom: 0;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+/* --- Modal de "Añadir Juegos" --- */
+.add-games-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  max-height: 55vh;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-background);
+}
+
+.add-games-list li {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.add-games-list li:last-child {
+    border-bottom: none;
+}
+
+.add-games-list li:hover {
+    background-color: var(--color-background-mute);
+}
+
+.add-games-list li.selected-for-add {
+    background-color: hsla(160, 100%, 37%, 0.1);
+}
+
+.add-games-list li .add-game-cover-thumb {
+  width: 100px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  margin-right: 0.75rem;
+  border-radius: 3px;
+  background-color: var(--color-background-mute);
+}
+
+.add-game-name-text {
+    flex-grow: 1;
+    font-size: 0.9rem;
+}
+
+.add-game-checkbox {
+    margin-left: 1rem;
+    pointer-events: none;
+    transform: scale(1.1);
+}
+
+/* --- Modal Rediseñado: Filtros y Rejilla --- */
+.modal-filters-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-filter-group {
+  flex: 1 1 150px;
+}
+
+.modal-filter-group.search-group {
+  flex-basis: 100%;
+}
+
+.modal-search-input, .modal-filter-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.modal-search-input:focus, .modal-filter-group select:focus {
+  outline: none;
+  border-color: hsla(160, 100%, 37%, 1);
+}
+
+.modal-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.modal-games-grid .library-game-card {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  background-color: var(--color-background);
+}
+
+.modal-games-grid .library-game-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-hover);
+}
+
+.modal-games-grid .library-game-card.selected-for-add {
+  border-color: hsla(160, 100%, 37%, 1);
+  transform: scale(0.95);
+  box-shadow: 0 0 10px hsla(160, 100%, 37%, 0.4);
+}
+
+.modal-games-grid .card-content {
+    padding: 0.5rem;
+}
+
+.modal-games-grid .game-title {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.selection-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(1, 201, 149, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.library-game-card.selected-for-add .selection-overlay {
+  opacity: 1;
+}
+
+/* --- Botones de Acción (Unificados) --- */
+.action-button {
+  padding: 0.7em 1.4em;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  border: 1px solid transparent;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.action-button.primary {
+  background-color: hsla(160, 100%, 37%, 1);
+  color: white;
+  border-color: hsla(160, 100%, 37%, 1);
+}
+
+.action-button.primary:hover:not(:disabled) {
+    background-color: hsla(160, 100%, 30%, 1);
+}
+
+.action-button.secondary {
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+  border-color: var(--color-border-hover);
+}
+
+.action-button.secondary:hover:not(:disabled) {
+    background-color: var(--color-border);
+}
+
+.action-button.danger {
+  background-color: #c94040;
+  color: white;
+  border-color: #c94040;
+}
+
+.action-button.add-tier-section {
+  background-color: #3498db;
+  color: #ffffff;
+  border-color: #2980b9;
+  transition: all 0.3s ease;
+}
+
+.action-button.add-tier-section:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+.action-button.edit-tierlist{
+  background-color: hsla(160, 100%, 37%, 1);
+  color: white;
+  border-color: var(--color-border-hover);
+}
+
+.action-button.edit-tierlist:hover:not(:disabled) {
+    background-color: hsla(160, 100%, 30%, 1);
+}
+
+.action-button.danger:hover:not(:disabled) {
+    background-color: #a53232;
+}
+
+.action-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.action-button-small {
+  padding: 0.4em 0.8em;
+  font-size: 0.85rem;
+}
+
+.action-button-small.tertiary {
+  background-color: var(--color-background-mute);
+  color: white;
+  border: 1px solid var(--color-border);
+}
+
+.action-button-small.tertiary:hover:not(:disabled) {
+    background-color: var(--color-border);
+}
+
+/* --- Estilos para Móviles (Responsive) --- */
+@media (max-width: 768px) {
+  .header-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .header-actions-tierlist {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .header-info h1 {
+    font-size: 1.5rem;
+  }
+  .tier-row {
+    min-height: auto;
+  }
+  .tier-label {
+    width: 70px;
+    min-width: 70px;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+  }
+  .unclassified-label {
+    font-size: 0.8rem;
+  }
+  .tier-label .tier-actions {
+    gap: 2px;
+  }
+  .tier-label .icon-button {
+    padding: 1px 3px;
+    font-size: 0.6rem;
+  }
+  .tier-row-delete-button {
+    padding: 0 0.5rem;
+  }
+  .tier-row-delete-button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .tier-items-droppable-area {
+    padding: 0.4rem;
+    min-height: 80px;
+  }
+  .tier-items-grid-horizontal {
+    gap: 0.3rem;
+  }
+  .tier-items-grid-horizontal .tier-item-compact {
+    flex: 0 0 65px ;
+  }
+  .unclassified-label .action-button-small.tertiary {
+    padding: 0.5em 0.8em;
+    font-size: 0.8rem;
+    white-space: normal;
+    text-align: center;
+    max-width: 100%;
+  }
+  .remove-item-button-compact {
+    background-color: #d8000c;
+    opacity: 1;
+  }
+}

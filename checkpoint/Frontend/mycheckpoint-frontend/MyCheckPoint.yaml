@@ -1,0 +1,3650 @@
+---
+openapi: "3.0.1"
+info: 
+  title: "MyCheckPoint"
+  description: "API para la aplicación MyCheckPoint"
+  termsOfService: "http://swagger.io/terms/"
+  license: 
+    name: "Apache 2.0"
+    url: "http://springdoc.org"
+  version: "v1"
+servers: 
+- url: "http://localhost:8080"
+  description: "Generated server url"
+security: 
+-
+  bearerAuth: 
+tags: 
+- name: "Friendship Controller"
+  description: "API para la gestión de amistades y solicitudes de amistad"
+- name: "Usuarios"
+  description: "API para la gestión de usuarios"
+- name: "Game Controller"
+  description: "API para interactuar con información de juegos, principalmente a través de IGDB"
+- name: "GameList Controller"
+  description: "API para la gestión de listas de juegos personalizadas por el usuario"
+- name: "User Game Library Controller"
+  description: "API para gestionar la biblioteca de juegos personal de un usuario"
+- name: "Autenticación Controller"
+  description: "API para la autenticación de usuarios y gestión de tokens"
+- name: "TierList Controller"
+  description: "API para la gestión de Tier Lists de juegos"
+paths: 
+  /api/v1/usuarios/me: 
+    get: 
+      tags: 
+      - "Usuarios"
+      summary: "Obtener los datos del usuario autenticado actualmente"
+      description: "Recupera los detalles del perfil y preferencias del usuario que ha iniciado sesión. Requiere un token JWT válido en la cabecera de autorización."
+      operationId: "getCurrentAuthenticatedUser"
+      responses: 
+        200: 
+          description: "Datos del usuario autenticado devueltos exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UserDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado (identificado por el token) no pudo ser encontrado en la base de datos."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    put: 
+      tags: 
+      - "Usuarios"
+      summary: "Actualizar el perfil del usuario autenticado actualmente"
+      description: "Permite al usuario autenticado modificar los detalles de su perfil, como el nombre de usuario, tema, foto de perfil, preferencias de notificación y visibilidad del perfil. Requiere un token JWT válido."
+      operationId: "updateCurrentUserProfile"
+      requestBody: 
+        description: "Datos del perfil del usuario a actualizar. Solo se actualizarán los campos proporcionados."
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/UserProfileUpdateDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Perfil de usuario actualizado exitosamente. Devuelve los datos actualizados del usuario."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UserDTO"
+        400: 
+          description: "Datos de entrada inválidos. Ocurre si los datos proporcionados en `UserProfileUpdateDTO` no pasan las validaciones (ej. nombre de usuario demasiado corto/largo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado (identificado por el token) no pudo ser encontrado en la base de datos para la actualización."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        409: 
+          description: "Conflicto. El nuevo nombre de usuario elegido ya está en uso por otro usuario."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/DuplicatedResourceResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    delete: 
+      tags: 
+      - "Usuarios"
+      summary: "Programar la eliminación de la cuenta del usuario autenticado"
+      description: "Permite al usuario autenticado solicitar la eliminación de su cuenta. Se requiere la contraseña actual para confirmación. La cuenta se marcará para eliminación y se borrará permanentemente después de un período de gracia. Tras esta operación, la sesión actual del usuario se invalidará. Requiere un token JWT válido."
+      operationId: "deleteMyAccount"
+      requestBody: 
+        description: "DTO que contiene la contraseña actual del usuario para confirmar la eliminación de la cuenta."
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/AccountDeleteDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Solicitud de eliminación de cuenta procesada. La cuenta ha sido programada para eliminación y la sesión actual invalidada."
+          content: 
+            application/json: 
+              schema: 
+                type: "object"
+              examples: 
+                AccountDeletionScheduled: 
+                  summary: "Ejemplo de respuesta exitosa"
+                  description: "AccountDeletionScheduled"
+                  value: 
+                    message: "Tu cuenta ha sido programada para eliminación vuelve a iniciar sesion si quieres mantenerla."
+        401: 
+          description: "No autorizado. La contraseña actual proporcionada es incorrecta, o el token JWT es inválido/expirado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser encontrado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/usuarios/me/password: 
+    put: 
+      tags: 
+      - "Usuarios"
+      summary: "Cambiar la contraseña del usuario autenticado actualmente"
+      description: "Permite al usuario autenticado cambiar su contraseña actual por una nueva. Se requiere la contraseña actual para la verificación. Requiere un token JWT válido."
+      operationId: "changeMyPassword"
+      requestBody: 
+        description: "DTO con la contraseña actual y la nueva contraseña."
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/PasswordChangeDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Contraseña actualizada correctamente."
+          content: 
+            application/json: 
+              schema: 
+                type: "object"
+                example: 
+                  message: "Contraseña actualizada correctamente."
+              examples: 
+                RespuestaExitosaCambioPass: 
+                  description: "RespuestaExitosaCambioPass"
+                  value: 
+                    message: "Contraseña actualizada correctamente."
+        400: 
+          description: "Datos de entrada inválidos o solicitud incorrecta (ej. nueva contraseña igual a la actual)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationPasswordErrorResponse"
+        401: 
+          description: "No autorizado. La contraseña actual proporcionada es incorrecta, o el token JWT es inválido/expirado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser encontrado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/users/me/gamelists/{listPublicId}: 
+    get: 
+      tags: 
+      - "GameList Controller"
+      summary: "Obtener una lista de juegos específica del usuario autenticado por su ID público"
+      description: "Recupera los detalles y los juegos contenidos en una lista de juegos específica, identificada por su ID público (UUID), que pertenezca al usuario actualmente autenticado. Requiere autenticación."
+      operationId: "getMySpecificGameList"
+      parameters: 
+      - name: "listPublicId"
+        in: "path"
+        description: "ID público (UUID) de la lista de juegos a obtener."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      responses: 
+        200: 
+          description: "Lista de juegos específica recuperada exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/GameListResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. La lista de juegos con el ID público especificado no fue encontrada para el usuario actual, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    put: 
+      tags: 
+      - "GameList Controller"
+      summary: "Actualizar una lista de juegos existente del usuario autenticado"
+      description: "Permite al usuario autenticado modificar los detalles (nombre, descripción, visibilidad) de una de sus listas de juegos existentes, identificada por su ID público (UUID). Solo los campos proporcionados en el cuerpo de la solicitud serán actualizados. Requiere autenticación."
+      operationId: "updateMyGameList"
+      parameters: 
+      - name: "listPublicId"
+        in: "path"
+        description: "ID público (UUID) de la lista de juegos a actualizar."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/GameListRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Lista de juegos actualizada exitosamente. Devuelve los detalles actualizados de la lista."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/GameListResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. Ocurre si los datos en `GameListRequestDTO` no pasan las validaciones (ej. nombre en blanco si se modifica, descripción demasiado larga)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. La lista de juegos con el ID público especificado no fue encontrada para el usuario actual, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    delete: 
+      tags: 
+      - "GameList Controller"
+      summary: "Eliminar una lista de juegos del usuario autenticado"
+      description: "Permite al usuario autenticado eliminar una de sus listas de juegos existentes, identificada por su ID público (UUID). Esto no elimina los juegos de la biblioteca del usuario, solo la lista en sí. Requiere autenticación."
+      operationId: "deleteMyGameList"
+      parameters: 
+      - name: "listPublicId"
+        in: "path"
+        description: "ID público (UUID) de la lista de juegos a eliminar."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      responses: 
+        204: 
+          description: "Lista de juegos eliminada exitosamente. No hay contenido en la respuesta."
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. La lista de juegos con el ID público especificado no fue encontrada para el usuario actual, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/{tierListPublicId}: 
+    get: 
+      tags: 
+      - "TierList Controller"
+      summary: "Obtener una Tier List específica por su ID público"
+      description: "Recupera los detalles completos de una Tier List (incluyendo secciones e ítems) utilizando su ID público (UUID). Si la Tier List es pública, cualquiera puede acceder a ella. Si la Tier List es privada, solo el propietario autenticado puede acceder. La autenticación (JWT) es opcional; si se proporciona un token válido y la lista es privada, se verificará la propiedad."
+      operationId: "getTierListByPublicId"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List a obtener."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      responses: 
+        200: 
+          description: "Tier List recuperada exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        401: 
+          description: "No autorizado. Se proporcionó un token JWT inválido o expirado al intentar acceder a una Tier List privada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. La Tier List es privada y el usuario (autenticado o anónimo) no tiene permiso para accederla."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List con el ID público especificado no existe, o el usuario (si está autenticado) no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+    put: 
+      tags: 
+      - "TierList Controller"
+      summary: "Actualizar los metadatos de una Tier List existente"
+      description: "Permite al propietario autenticado de una Tier List modificar sus metadatos como el nombre, la descripción y el estado de visibilidad (pública/privada). Solo los campos proporcionados en el cuerpo de la solicitud serán actualizados. Requiere autenticación y ser el propietario de la Tier List."
+      operationId: "updateTierListMetadata"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List a actualizar."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/TierListUpdateRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Metadatos de la Tier List actualizados exitosamente. Devuelve la Tier List completa y actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. Ocurre si los datos en `TierListUpdateRequestDTO` no pasan las validaciones (ej. nombre demasiado largo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List que intenta modificar."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List con el ID público especificado no fue encontrada para el usuario actual, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    delete: 
+      tags: 
+      - "TierList Controller"
+      summary: "Eliminar una Tier List existente"
+      description: "Permite al propietario autenticado de una Tier List eliminarla permanentemente. Esto también eliminará todas las secciones y los ítems contenidos en ella. Requiere autenticación y ser el propietario de la Tier List."
+      operationId: "deleteTierList"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List a eliminar."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      responses: 
+        204: 
+          description: "Tier List eliminada exitosamente. No hay contenido en la respuesta."
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List que intenta eliminar."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List con el ID público especificado no fue encontrada para el usuario actual, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/{tierListPublicId}/sections/{sectionInternalId}: 
+    put: 
+      tags: 
+      - "TierList Controller"
+      summary: "Actualizar el nombre de una sección (tier) específica en una Tier List"
+      description: "Permite al propietario autenticado de una Tier List cambiar el nombre de una de sus secciones personalizadas. No se puede cambiar el nombre de la sección por defecto 'Juegos por Clasificar'. Requiere autenticación y ser el propietario de la Tier List."
+      operationId: "updateSectionName"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List que contiene la sección a actualizar."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      - name: "sectionInternalId"
+        in: "path"
+        description: "ID interno (Long) de la sección (tier) cuyo nombre se va a actualizar."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "101"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/TierSectionRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Nombre de la sección actualizado exitosamente. Devuelve la Tier List completa y actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. El nuevo nombre de la sección no cumple las validaciones (ej. vacío o demasiado largo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List o intenta modificar una sección no permitida (ej. la sección 'Sin Clasificar' si se implementara tal restricción aquí)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List con el ID público especificado o la sección con el ID interno no fueron encontradas para el usuario actual, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    delete: 
+      tags: 
+      - "TierList Controller"
+      summary: "Eliminar una sección (tier) de una Tier List"
+      description: "Permite al propietario autenticado de una Tier List eliminar una de sus secciones personalizadas. La sección por defecto 'Juegos por Clasificar' no puede ser eliminada. Debe quedar al menos una sección personalizable tras la eliminación. Si la sección eliminada contenía ítems (juegos), estos serán movidos a la sección 'Juegos por Clasificar'. Requiere autenticación y ser el propietario de la Tier List."
+      operationId: "removeSectionFromTierList"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List de la cual se eliminará la sección."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      - name: "sectionInternalId"
+        in: "path"
+        description: "ID interno (Long) de la sección (tier) a eliminar."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "102"
+      responses: 
+        200: 
+          description: "Sección eliminada exitosamente (e ítems reubicados si aplicable). Devuelve la Tier List completa y actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Solicitud incorrecta. No se puede eliminar la sección por defecto 'Juegos por Clasificar' o se intenta eliminar la última sección personalizable."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List o la sección especificada no fueron encontradas para el usuario actual, o el usuario no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor (ej. la sección 'Sin Clasificar' no se encontró al intentar mover ítems)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/{tierListPublicId}/items/{tierListItemInternalId}/move: 
+    put: 
+      tags: 
+      - "TierList Controller"
+      summary: "Mover un ítem (juego) dentro de una Tier List"
+      description: "Permite al propietario autenticado mover un ítem existente (identificado por `tierListItemInternalId`) a una nueva sección (`target_section_internal_id`) y/o a una nueva posición (`new_order`) dentro de esa sección en una Tier List específica. Para Tier Lists de tipo 'FROM_GAMELIST', se verifica que el juego del ítem aún pertenezca a la GameList origen. Requiere autenticación y ser propietario de la Tier List."
+      operationId: "moveItemInTierList"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List que contiene el ítem a mover."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      - name: "tierListItemInternalId"
+        in: "path"
+        description: "ID interno (Long) del TierListItem a mover."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "201"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/TierListItemMoveRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Ítem movido exitosamente. Devuelve la Tier List completa y actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Solicitud incorrecta. Los datos en `TierListItemMoveRequestDTO` son inválidos (ej. IDs nulos), o la operación es inválida para el tipo de Tier List (ej. juego ya no en GameList origen)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List, el ítem a mover, o la sección destino no fueron encontrados, o el usuario no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/friends/requests/accept/{requesterUserPublicId}: 
+    put: 
+      tags: 
+      - "Friendship Controller"
+      summary: "Aceptar una solicitud de amistad pendiente"
+      description: "Permite al usuario autenticado (que es el receptor de la solicitud) aceptar una solicitud de amistad pendiente de otro usuario. La solicitud debe estar en estado PENDIENTE. Requiere autenticación."
+      operationId: "acceptFriendRequest"
+      parameters: 
+      - name: "requesterUserPublicId"
+        in: "path"
+        description: "ID público (UUID) del usuario que envió la solicitud de amistad."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "c4d5e6f7-g8h9-0123-4567-890abcdef12"
+      responses: 
+        200: 
+          description: "Solicitud de amistad aceptada exitosamente. Devuelve el estado actualizado de la amistad."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/FriendshipResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el receptor de la solicitud de amistad pendiente o no tiene permisos para realizar esta acción."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. No se encontró una solicitud de amistad pendiente del usuario especificado, o el usuario solicitante/actual no existe."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/usuarios: 
+    post: 
+      tags: 
+      - "Usuarios"
+      summary: "Registrar un nuevo usuario"
+      description: "Crea una nueva cuenta de usuario en el sistema. Tras el registro exitoso, se enviará un correo electrónico de verificación a la dirección proporcionada para activar la cuenta."
+      operationId: "registrarUsuario"
+      requestBody: 
+        description: "Datos del nuevo usuario a registrar. Todos los campos son obligatorios."
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/UserCreateDTO"
+        required: "true"
+      responses: 
+        201: 
+          description: "Usuario creado exitosamente. Devuelve los datos del usuario recién creado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UserDTO"
+        400: 
+          description: "Datos de entrada inválidos. Ocurre si los datos proporcionados en `UserCreateDTO` no pasan las validaciones (ej. email no válido, contraseña corta)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        409: 
+          description: "Conflicto. El email o el nombre de usuario proporcionado ya se encuentra registrado en el sistema."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/DuplicatedResourceResponse"
+        500: 
+          description: "Error interno del servidor. Ocurrió un problema inesperado durante el proceso de registro."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/usuarios/me/profile-picture: 
+    post: 
+      tags: 
+      - "Usuarios"
+      summary: "Subir o actualizar la foto de perfil del usuario autenticado"
+      description: "Permite al usuario autenticado subir un nuevo archivo de imagen para su foto de perfil. El archivo debe ser de un formato permitido (JPEG, PNG, GIF) y no exceder el tamaño máximo configurado. Si ya existe una foto de perfil, será reemplazada. Requiere autenticación."
+      operationId: "uploadProfilePicture"
+      requestBody: 
+        content: 
+          multipart/form-data: 
+            schema: 
+              required: 
+              - "file"
+              type: "object"
+              properties: 
+                file: 
+                  type: "string"
+                  description: "El archivo de imagen a subir como foto de perfil."
+                  format: "binary"
+      responses: 
+        200: 
+          description: "Foto de perfil subida y perfil actualizado exitosamente. Devuelve los datos actualizados del usuario."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UserDTO"
+        400: 
+          description: "Solicitud incorrecta. El archivo proporcionado está vacío, tiene un formato no permitido, o hay un problema con el nombre del archivo."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser encontrado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        413: 
+          description: "Payload Too Large. El archivo excede el tamaño máximo permitido para fotos de perfil o el límite general de subida."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TooLargeResponse"
+        500: 
+          description: "Error interno del servidor. No se pudo crear el directorio de almacenamiento, guardar el archivo, o ocurrió otro error inesperado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/users/me/tierlists: 
+    get: 
+      tags: 
+      - "TierList Controller"
+      summary: "Obtener todas las Tier Lists de perfil del usuario autenticado"
+      description: "Recupera una lista de todas las Tier Lists de tipo 'PROFILE_GLOBAL' creadas por el usuario actualmente autenticado. Cada Tier List incluye sus secciones y los ítems clasificados. Requiere autenticación."
+      operationId: "getAllProfileTierListsForCurrentUser"
+      responses: 
+        200: 
+          description: "Tier Lists de perfil recuperadas exitosamente. La lista puede estar vacía si el usuario no ha creado ninguna."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/TierListResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    post: 
+      tags: 
+      - "TierList Controller"
+      summary: "Crear una nueva Tier List de perfil para el usuario autenticado"
+      description: "Permite al usuario autenticado crear una nueva Tier List de tipo 'PROFILE_GLOBAL'. Se requiere un nombre para la lista y opcionalmente una descripción y si es pública. Se crearán secciones por defecto (S, A, B, C, D y 'Juegos por Clasificar'). Requiere autenticación."
+      operationId: "createProfileTierList"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/TierListCreateRequestDTO"
+        required: "true"
+      responses: 
+        201: 
+          description: "Tier List de perfil creada exitosamente. Devuelve los detalles de la lista recién creada, incluyendo las secciones por defecto."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. Ocurre si los datos en `TierListCreateRequestDTO` no pasan las validaciones (ej. nombre vacío o demasiado largo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/users/me/library/games/{igdbId}: 
+    get: 
+      tags: 
+      - "User Game Library Controller"
+      summary: "Obtener un juego específico de la biblioteca del usuario autenticado"
+      description: "Recupera los detalles de un juego específico (identificado por su IGDB ID) tal como existe en la biblioteca personal del usuario autenticado. Esto incluye el estado, puntuación, y otros datos que el usuario haya registrado para ese juego. Requiere autenticación."
+      operationId: "getSpecificGameFromMyLibrary"
+      parameters: 
+      - name: "igdbId"
+        in: "path"
+        description: "ID de IGDB del juego a obtener de la biblioteca del usuario."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "1020"
+      responses: 
+        200: 
+          description: "Juego específico de la biblioteca recuperado exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UserGameResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El juego con el IGDB ID especificado no se encontró en la biblioteca del usuario, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    post: 
+      tags: 
+      - "User Game Library Controller"
+      summary: "Añadir o actualizar un juego en la biblioteca del usuario autenticado"
+      description: "Permite al usuario autenticado añadir un juego (identificado por su IGDB ID) a su biblioteca personal o actualizar una entrada existente. Si el juego no existe en la base de datos local, se intentará obtener de IGDB. Se proporcionan datos específicos del usuario para este juego (estado, puntuación, plataforma, etc.). Requiere autenticación."
+      operationId: "addOrUpdateGameInMyLibrary"
+      parameters: 
+      - name: "igdbId"
+        in: "path"
+        description: "ID de IGDB del juego a añadir o actualizar en la biblioteca."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "1020"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/UserGameDataDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Juego añadido o actualizado en la biblioteca exitosamente. Devuelve la entrada de la biblioteca actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UserGameResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. Ocurre si los datos en `UserGameDataDTO` no pasan las validaciones (ej. puntuación fuera de rango)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado, o el juego con el `igdbId` proporcionado no se encontró en IGDB."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor. Podría ocurrir si hay problemas al contactar IGDB o al guardar los datos."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    delete: 
+      tags: 
+      - "User Game Library Controller"
+      summary: "Eliminar un juego de la biblioteca del usuario autenticado"
+      description: "Permite al usuario autenticado eliminar un juego específico (identificado por su IGDB ID) de su biblioteca personal. Requiere autenticación."
+      operationId: "removeGameFromMyLibrary"
+      parameters: 
+      - name: "igdbId"
+        in: "path"
+        description: "ID de IGDB del juego a eliminar de la biblioteca del usuario."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "1020"
+      responses: 
+        204: 
+          description: "Juego eliminado de la biblioteca exitosamente. No hay contenido en la respuesta."
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El juego con el IGDB ID especificado no se encontró en la biblioteca del usuario para eliminar, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/users/me/gamelists: 
+    get: 
+      tags: 
+      - "GameList Controller"
+      summary: "Obtener todas las listas de juegos del usuario autenticado"
+      description: "Recupera una lista de todas las listas de juegos personalizadas creadas por el usuario actualmente autenticado. Las listas se devuelven ordenadas por la fecha de última actualización de forma descendente. Requiere autenticación."
+      operationId: "getMyGameLists"
+      responses: 
+        200: 
+          description: "Listas de juegos recuperadas exitosamente. La lista puede estar vacía si el usuario no ha creado ninguna."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/GameListResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+    post: 
+      tags: 
+      - "GameList Controller"
+      summary: "Crear una nueva lista de juegos para el usuario autenticado"
+      description: "Permite al usuario autenticado crear una nueva lista de juegos personalizada. Se requiere un nombre para la lista y se puede especificar si es pública o privada. Requiere autenticación."
+      operationId: "createMyGameList"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/GameListRequestDTO"
+        required: "true"
+      responses: 
+        201: 
+          description: "Lista de juegos creada exitosamente. Devuelve los detalles de la lista recién creada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/GameListResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. Ocurre si los datos en `GameListRequestDTO` no pasan las validaciones (ej. nombre vacío)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/users/me/gamelists/{listPublicId}/games: 
+    post: 
+      tags: 
+      - "GameList Controller"
+      summary: "Añadir un juego de la biblioteca del usuario a una de sus listas de juegos"
+      description: "Permite al usuario autenticado añadir una entrada de juego existente en su biblioteca personal (identificada por su `user_game_id` interno) a una de sus listas de juegos personalizadas (identificada por `listPublicId`). El juego no se añade si ya está presente en la lista. Requiere autenticación."
+      operationId: "addGameToMyCustomList"
+      parameters: 
+      - name: "listPublicId"
+        in: "path"
+        description: "ID público (UUID) de la lista de juegos a la que se añadirá el juego."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/AddGameToCustomListRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Juego añadido a la lista exitosamente (o ya estaba presente). Devuelve la lista actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/GameListResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. El `user_game_id` en el cuerpo de la solicitud es nulo o inválido."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El juego que se intenta añadir no pertenece a la biblioteca del usuario autenticado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La lista de juegos especificada (`listPublicId`) o la entrada de juego de la biblioteca (`user_game_id`) no fueron encontradas, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/{tierListPublicId}/sections: 
+    post: 
+      tags: 
+      - "TierList Controller"
+      summary: "Añadir una nueva sección (tier) a una Tier List existente"
+      description: "Permite al propietario autenticado de una Tier List añadir una nueva sección personalizada. Existe un límite en la cantidad de secciones personalizables que se pueden añadir. Requiere autenticación y ser el propietario de la Tier List."
+      operationId: "addSectionToTierList"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List a la que se añadirá la nueva sección."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/TierSectionRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Sección añadida exitosamente. Devuelve la Tier List completa y actualizada con la nueva sección."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos (ej. nombre de sección vacío o demasiado largo) o se ha alcanzado el límite máximo de secciones personalizables."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List a la que intenta añadir una sección."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List con el ID público especificado no fue encontrada para el usuario actual, o el usuario autenticado no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/{tierListPublicId}/sections/{sectionInternalId}/items: 
+    post: 
+      tags: 
+      - "TierList Controller"
+      summary: "Añadir o mover un ítem (juego) a una sección específica de una Tier List de perfil"
+      description: "Permite al propietario autenticado añadir un juego de su biblioteca (UserGame) a una sección específica de una Tier List de tipo 'PROFILE_GLOBAL'. Si el juego ya está en otra sección de esta Tier List, se moverá a la nueva sección y posición. No se puede usar este endpoint para Tier Lists de tipo 'FROM_GAMELIST' ni para añadir a la sección 'Juegos por Clasificar'. Se puede especificar el orden del ítem dentro de la sección. Requiere autenticación y ser propietario."
+      operationId: "addItemToTierListSection"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List a la que se añadirá el ítem."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      - name: "sectionInternalId"
+        in: "path"
+        description: "ID interno (Long) de la sección (tier) destino dentro de la Tier List."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "102"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/TierListItemAddRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Ítem añadido o movido a la sección exitosamente. Devuelve la Tier List completa y actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Solicitud incorrecta. El `user_game_id` es nulo, la Tier List es de tipo 'FROM_GAMELIST', o se intenta añadir a la sección 'Sin Clasificar' usando este endpoint."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List o el UserGame a añadir no le pertenece."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List, la sección especificada o el UserGame a añadir no fueron encontrados, o el usuario no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/{tierListPublicId}/items/unclassified: 
+    post: 
+      tags: 
+      - "TierList Controller"
+      summary: "Añadir o mover un ítem (juego) a la sección 'Sin Clasificar' de una Tier List de perfil"
+      description: "Permite al propietario autenticado añadir un juego de su biblioteca (UserGame) directamente a la sección 'Juegos por Clasificar' de una Tier List de tipo 'PROFILE_GLOBAL'. Si el juego ya está en otra sección de esta Tier List, se moverá a la sección 'Juegos por Clasificar'. No se puede usar este endpoint para Tier Lists de tipo 'FROM_GAMELIST'. Se puede especificar el orden del ítem dentro de la sección. Requiere autenticación y ser propietario."
+      operationId: "addItemToUnclassifiedSection"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List a la que se añadirá el ítem en la sección 'Sin Clasificar'."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      requestBody: 
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/TierListItemAddRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Ítem añadido o movido a la sección 'Sin Clasificar' exitosamente. Devuelve la Tier List completa y actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Solicitud incorrecta. El `user_game_id` es nulo, o la Tier List es de tipo 'FROM_GAMELIST'."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List o el UserGame a añadir no le pertenece."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List o el UserGame a añadir no fueron encontrados, o el usuario no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor (ej. la sección 'Sin Clasificar' no se encontró)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/friends/requests/send/{receiverUserPublicId}: 
+    post: 
+      tags: 
+      - "Friendship Controller"
+      summary: "Enviar una solicitud de amistad"
+      description: "Permite al usuario autenticado enviar una solicitud de amistad a otro usuario especificado por su ID público. Si ya existe una solicitud pendiente del receptor hacia el emisor, la amistad se aceptará automáticamente. Requiere autenticación."
+      operationId: "sendFriendRequest"
+      parameters: 
+      - name: "receiverUserPublicId"
+        in: "path"
+        description: "ID público (UUID) del usuario al que se le envía la solicitud de amistad."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      responses: 
+        200: 
+          description: "Solicitud de amistad enviada o amistad auto-aceptada exitosamente. Devuelve el estado de la amistad/solicitud."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/FriendshipResponseDTO"
+        400: 
+          description: "Solicitud incorrecta. El usuario no puede enviarse una solicitud a sí mismo."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario receptor especificado por `receiverUserPublicId` no existe, o el usuario emisor no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        409: 
+          description: "Conflicto. Ya existe una amistad o una solicitud de amistad pendiente con este usuario."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/DuplicatedResourceResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/auth/reset-password: 
+    post: 
+      tags: 
+      - "Autenticación Controller"
+      summary: "Restablecer la contraseña del usuario utilizando un token"
+      description: "Permite a un usuario establecer una nueva contraseña utilizando el token de restablecimiento que recibió por correo electrónico. El token debe ser válido y no haber expirado. Este endpoint es público."
+      operationId: "resetPassword"
+      requestBody: 
+        description: "DTO que contiene el token de restablecimiento y la nueva contraseña deseada."
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/ResetPasswordDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Contraseña restablecida exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                type: "object"
+              examples: 
+                PasswordResetSuccess: 
+                  description: "PasswordResetSuccess"
+                  value: 
+                    message: "Tu contraseña ha sido restablecida exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña."
+        400: 
+          description: "Solicitud incorrecta. Los datos proporcionados en `ResetPasswordDTO` no son válidos (ej. token vacío, contraseña nueva no cumple requisitos), el token ya fue usado, ha expirado, o la nueva contraseña es la misma que la actual."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationPasswordErrorResponse"
+        404: 
+          description: "No encontrado. El token de restablecimiento proporcionado no existe o es inválido."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/auth/login: 
+    post: 
+      tags: 
+      - "Autenticación Controller"
+      summary: "Autenticar usuario y obtener token JWT"
+      description: "Permite a un usuario iniciar sesión proporcionando su identificador (email o nombre de usuario) y contraseña. Si las credenciales son válidas y la cuenta está activa, se devuelve un token JWT. Si el usuario tenía una eliminación de cuenta programada y la fecha aún no ha pasado, esta se cancela."
+      operationId: "authenticateUser"
+      requestBody: 
+        description: "Credenciales del usuario para iniciar sesión."
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/LoginRequestDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Autenticación exitosa. Devuelve el token JWT."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/JwtResponseDTO"
+        400: 
+          description: "Datos de entrada inválidos. El identificador o la contraseña no cumplen los requisitos de formato o están vacíos."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        401: 
+          description: "No autorizado. Credenciales incorrectas o fallo general de autenticación."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. La cuenta está deshabilitada (ej. email no verificado) o la cuenta ha sido eliminada porque su fecha de eliminación programada ya pasó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no se pudo encontrar en la base de datos (error interno anómalo durante la cancelación de eliminación)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/auth/forgot-password: 
+    post: 
+      tags: 
+      - "Autenticación Controller"
+      summary: "Solicitar restablecimiento de contraseña"
+      description: "Inicia el proceso para restablecer la contraseña de un usuario. El usuario proporciona su dirección de correo electrónico. Si el correo está registrado, se enviará un email con un token e instrucciones para restablecer la contraseña. Para no revelar si un email existe en el sistema, este endpoint siempre devuelve una respuesta genérica de éxito, independientemente de si el email fue encontrado o no. Este endpoint es público."
+      operationId: "forgotPassword"
+      requestBody: 
+        description: "DTO que contiene el correo electrónico del usuario que ha olvidado su contraseña."
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/ForgotPasswordDTO"
+        required: "true"
+      responses: 
+        200: 
+          description: "Solicitud procesada. Se enviará un correo si el email está registrado."
+          content: 
+            application/json: 
+              schema: 
+                type: "object"
+              examples: 
+                ForgotPasswordSuccess: 
+                  description: "ForgotPasswordSuccess"
+                  value: 
+                    message: "Si tu dirección de correo electrónico está registrada, recibirás un enlace para restablecer tu contraseña."
+        400: 
+          description: "Datos de entrada inválidos. El formato del email proporcionado no es válido o el campo está vacío."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ValidationErrorResponse"
+  /api/v1/usuarios/search: 
+    get: 
+      tags: 
+      - "Usuarios"
+      summary: "Buscar usuarios por nombre de usuario"
+      description: "Permite a un usuario autenticado buscar otros usuarios en el sistema por su nombre de usuario. La búsqueda es parcial (contiene) e ignora mayúsculas/minúsculas. El propio usuario que realiza la búsqueda será excluido de los resultados. Se requiere un término de búsqueda de al menos 2 caracteres. Requiere autenticación."
+      operationId: "searchUsersByUsername"
+      parameters: 
+      - name: "username"
+        in: "query"
+        description: "Término de búsqueda para el nombre de usuario. Debe tener al menos 2 caracteres."
+        required: "true"
+        schema: 
+          minLength: "2"
+          type: "string"
+        example: "jua"
+      responses: 
+        200: 
+          description: "Búsqueda exitosa. Devuelve una lista de usuarios que coinciden con el criterio."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/UserSearchResultDTO"
+        400: 
+          description: "Solicitud incorrecta. El parámetro 'username' es obligatorio y debe tener al menos 2 caracteres."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/RequiredErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. No se encontraron usuarios con el nombre de usuario proporcionado"
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/usuarios/public/{publicId}: 
+    get: 
+      tags: 
+      - "Usuarios"
+      summary: "Obtener un usuario por su ID público"
+      description: "Recupera los detalles de un usuario específico utilizando su ID público (UUID). Este endpoint es público y no requiere autenticación."
+      operationId: "getUsuarioByPublicId"
+      parameters: 
+      - name: "publicId"
+        in: "path"
+        description: "ID público (UUID) del usuario a obtener."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      responses: 
+        200: 
+          description: "Usuario encontrado y devuelto exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UserDTO"
+        404: 
+          description: "No encontrado. No existe ningún usuario con el ID público proporcionado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/users/me/library/games: 
+    get: 
+      tags: 
+      - "User Game Library Controller"
+      summary: "Obtener la biblioteca completa de juegos del usuario autenticado"
+      description: "Recupera todas las entradas de juegos que el usuario actualmente autenticado tiene en su biblioteca personal, incluyendo el estado, puntuación, plataforma y otros datos específicos del usuario para cada juego. Requiere autenticación."
+      operationId: "getMyGameLibrary"
+      responses: 
+        200: 
+          description: "Biblioteca de juegos recuperada exitosamente. La lista puede estar vacía si el usuario no tiene juegos añadidos."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/UserGameResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/public: 
+    get: 
+      tags: 
+      - "TierList Controller"
+      summary: "Obtener todas las Tier Lists públicas"
+      description: "Recupera una lista de todas las Tier Lists que han sido marcadas como públicas por sus creadores. Cada Tier List incluye sus secciones y los ítems clasificados. Las listas se devuelven ordenadas por la fecha de última actualización. Este endpoint es público y no requiere autenticación."
+      operationId: "getAllPublicTierLists"
+      responses: 
+        200: 
+          description: "Lista de Tier Lists públicas recuperada exitosamente. La lista puede estar vacía si no hay ninguna."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/TierListResponseDTO"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/games/{igdbId}/details: 
+    get: 
+      tags: 
+      - "User Game Library Controller"
+      summary: "Obtener detalles completos de un juego"
+      description: "Recupera información detallada sobre un juego específico, identificado por su IGDB ID. Este endpoint es público. Si se proporciona un token JWT de autenticación válido, la respuesta incluirá adicionalmente los datos específicos del usuario para ese juego (si existen en su biblioteca), como su estado, puntuación, etc. Si no se proporciona autenticación o el token es inválido, solo se devolverá la información pública del juego y los comentarios públicos."
+      operationId: "getGameDetails"
+      parameters: 
+      - name: "igdbId"
+        in: "path"
+        description: "ID de IGDB del juego para el cual se solicitan los detalles."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "1020"
+      responses: 
+        200: 
+          description: "Detalles del juego recuperados exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/GameDetailDTO"
+        404: 
+          description: "No encontrado. El juego con el IGDB ID especificado no se encontró o el usuario (si está autenticado) no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor. Podría ocurrir si hay problemas al contactar IGDB."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/gamelists/{listPublicId}/public: 
+    get: 
+      tags: 
+      - "GameList Controller"
+      summary: "Obtener una lista de juegos pública específica por su ID público"
+      description: "Recupera los detalles y los juegos contenidos en una lista de juegos específica que haya sido marcada como pública, identificada por su ID público (UUID). Este endpoint es público y no requiere autenticación."
+      operationId: "viewPublicGameList"
+      parameters: 
+      - name: "listPublicId"
+        in: "path"
+        description: "ID público (UUID) de la lista de juegos pública a obtener."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+      responses: 
+        200: 
+          description: "Lista de juegos pública recuperada exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/GameListResponseDTO"
+        404: 
+          description: "No encontrado. La lista de juegos pública con el ID especificado no fue encontrada o no es pública."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/gamelists/{gameListPublicId}/tierlist: 
+    get: 
+      tags: 
+      - "TierList Controller"
+      summary: "Obtener o crear la Tier List asociada a una GameList específica"
+      description: "Recupera la Tier List de tipo 'FROM_GAMELIST' asociada a la GameList especificada por su ID público. Si no existe una Tier List para esa GameList, se crea una nueva automáticamente con secciones por defecto y se sincroniza con los juegos de la GameList (añadiéndolos a la sección 'Sin Clasificar'). Este endpoint es público si la GameList y la TierList resultante son públicas. Si la GameList es privada, se requiere autenticación y ser el propietario para acceder o crear la TierList asociada. Si se proporciona un token JWT válido, la respuesta puede incluir información adicional si el usuario es el propietario."
+      operationId: "getOrCreateTierListForGameList"
+      parameters: 
+      - name: "gameListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la GameList para la cual se obtendrá o creará la Tier List."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "c4d5e6f7-g8h9-0123-4567-890abcdef12"
+      responses: 
+        200: 
+          description: "Tier List recuperada o creada y sincronizada exitosamente."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        401: 
+          description: "No autorizado. Se proporcionó un token JWT inválido o expirado al intentar acceder a recursos que lo requerían (ej. GameList privada)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no tiene permiso para acceder a la GameList especificada (si es privada y no es el propietario) o a la TierList resultante."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La GameList con el ID público especificado no existe, o el usuario (si está autenticado) no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/gamelists/public: 
+    get: 
+      tags: 
+      - "GameList Controller"
+      summary: "Obtener todas las listas de juegos públicas"
+      description: "Recupera una lista de todas las listas de juegos que han sido marcadas como públicas por sus creadores. Las listas se devuelven ordenadas por la fecha de última actualización de forma descendente. Este endpoint es público y no requiere autenticación."
+      operationId: "viewAllPublicGameLists"
+      responses: 
+        200: 
+          description: "Listas de juegos públicas recuperadas exitosamente. La lista puede estar vacía si no hay ninguna."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/GameListResponseDTO"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/friends: 
+    get: 
+      tags: 
+      - "Friendship Controller"
+      summary: "Obtener la lista de amigos del usuario autenticado"
+      description: "Recupera una lista de todos los usuarios que son amigos del usuario actualmente autenticado (es decir, aquellas relaciones con estado 'ACCEPTED'). Requiere autenticación."
+      operationId: "getMyFriends"
+      responses: 
+        200: 
+          description: "Lista de amigos recuperada exitosamente. La lista puede estar vacía si el usuario no tiene amigos."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/FriendshipResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/friends/requests/sent: 
+    get: 
+      tags: 
+      - "Friendship Controller"
+      summary: "Obtener las solicitudes de amistad pendientes enviadas por el usuario autenticado"
+      description: "Recupera una lista de todas las solicitudes de amistad que el usuario actualmente autenticado ha enviado y que aún están pendientes de respuesta por parte de los destinatarios. Requiere autenticación."
+      operationId: "getPendingRequestsSent"
+      responses: 
+        200: 
+          description: "Lista de solicitudes pendientes enviadas recuperada exitosamente. La lista puede estar vacía."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/FriendshipResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/friends/requests/received: 
+    get: 
+      tags: 
+      - "Friendship Controller"
+      summary: "Obtener las solicitudes de amistad pendientes recibidas por el usuario autenticado"
+      description: "Recupera una lista de todas las solicitudes de amistad que el usuario actualmente autenticado ha recibido y aún están pendientes de acción (aceptar o rechazar). Requiere autenticación."
+      operationId: "getPendingRequestsReceived"
+      responses: 
+        200: 
+          description: "Lista de solicitudes pendientes recibidas recuperada exitosamente. La lista puede estar vacía."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/FriendshipResponseDTO"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. El usuario autenticado no pudo ser verificado en la base de datos (caso anómalo)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/auth/confirm-account: 
+    get: 
+      tags: 
+      - "Autenticación Controller"
+      summary: "Confirmar la dirección de correo electrónico de un usuario"
+      description: "Valida un token de verificación enviado al correo electrónico del usuario tras el registro. Si el token es válido y no ha expirado, la cuenta del usuario se marca como verificada. Este endpoint es público y se accede a través del enlace en el correo de verificación."
+      operationId: "confirmUserAccount"
+      parameters: 
+      - name: "token"
+        in: "query"
+        description: "El token de verificación único enviado al correo electrónico del usuario."
+        required: "true"
+        schema: 
+          type: "string"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      responses: 
+        200: 
+          description: "Correo electrónico verificado exitosamente."
+          content: 
+            text/plain: 
+              schema: 
+                type: "string"
+              example: "¡Tu correo electrónico ha sido verificado exitosamente! Ahora puedes iniciar sesión."
+        400: 
+          description: "Solicitud incorrecta. El token es inválido (ej. ya fue usado, ha expirado, o el correo ya estaba verificado)."
+          content: 
+            text/plain: 
+              schema: 
+                type: "string"
+              example: "Este enlace de verificación ya ha sido utilizado."
+        404: 
+          description: "No encontrado. El token de verificación proporcionado no existe o es inválido."
+          content: 
+            text/plain: 
+              schema: 
+                type: "string"
+              example: "Token de verificación inválido o no encontrado."
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/juegos/igdb/filtrar: 
+    get: 
+      tags: 
+      - "Game Controller"
+      summary: "Filtrar juegos en IGDB por múltiples criterios"
+      description: "Permite buscar juegos en IGDB aplicando filtros opcionales como rango de fechas de lanzamiento, ID de género, ID de tema, y ID de modo de juego. Devuelve un flujo (o lista) de juegos que coinciden, con un conjunto limitado de campos. Este endpoint es público."
+      operationId: "filtrarJuegosEnIgdb"
+      parameters: 
+      - name: "fecha_inicio"
+        in: "query"
+        description: "Fecha de inicio del rango de lanzamiento (timestamp Unix en segundos). Opcional."
+        required: "false"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "1420070400"
+      - name: "fecha_fin"
+        in: "query"
+        description: "Fecha de fin del rango de lanzamiento (timestamp Unix en segundos). Opcional."
+        required: "false"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "1451606399"
+      - name: "id_genero"
+        in: "query"
+        description: "ID del género según IGDB para filtrar. Opcional."
+        required: "false"
+        schema: 
+          type: "integer"
+          format: "int32"
+        example: "12"
+      - name: "id_tema"
+        in: "query"
+        description: "ID del tema según IGDB para filtrar. Opcional."
+        required: "false"
+        schema: 
+          type: "integer"
+          format: "int32"
+        example: "1"
+      - name: "id_modo_juego"
+        in: "query"
+        description: "ID del modo de juego según IGDB para filtrar. Opcional."
+        required: "false"
+        schema: 
+          type: "integer"
+          format: "int32"
+        example: "1"
+      - name: "limite"
+        in: "query"
+        description: "Número máximo de resultados a devolver. Opcional. Valor por defecto es 10, máximo 500."
+        required: "false"
+        schema: 
+          maximum: "500"
+          minimum: "1"
+          type: "integer"
+          format: "int32"
+          default: "10"
+        example: "25"
+      responses: 
+        200: 
+          description: "Búsqueda por filtros exitosa. Devuelve una lista de juegos encontrados (puede estar vacía)."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/GameDto"
+        400: 
+          description: "Solicitud incorrecta. Ocurre si alguno de los parámetros numéricos no puede ser parseado correctamente (ej. texto en lugar de número)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor o error al comunicarse con la API de IGDB."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/juegos/igdb/buscar: 
+    get: 
+      tags: 
+      - "Game Controller"
+      summary: "Buscar juegos en IGDB por nombre"
+      description: "Realiza una búsqueda de juegos en la base de datos de IGDB utilizando un término de búsqueda para el nombre. Devuelve un flujo (o lista) de juegos que coinciden, con un conjunto limitado de campos (nombre, calificación, carátula, fecha de lanzamiento, tipo, resumen, ID). Este endpoint es público."
+      operationId: "buscarJuegosEnIgdb"
+      parameters: 
+      - name: "nombre"
+        in: "query"
+        description: "Término de búsqueda para el nombre del juego."
+        required: "true"
+        schema: 
+          type: "string"
+        example: "Zelda"
+      responses: 
+        200: 
+          description: "Búsqueda exitosa. Devuelve una lista de juegos encontrados (puede estar vacía)."
+          content: 
+            application/json: 
+              schema: 
+                type: "array"
+                items: 
+                  $ref: "#/components/schemas/GameDto"
+        400: 
+          description: "Solicitud incorrecta. El parámetro 'nombre' es obligatorio."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor o error al comunicarse con la API de IGDB."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/users/me/gamelists/{listPublicId}/games/{userGameInternalId}: 
+    delete: 
+      tags: 
+      - "GameList Controller"
+      summary: "Eliminar un juego de una lista de juegos personalizada del usuario autenticado"
+      description: "Permite al usuario autenticado eliminar un juego específico (identificado por su `userGameInternalId`) de una de sus listas de juegos (identificada por `listPublicId`). Esto no elimina el juego de la biblioteca general del usuario, solo de esta lista en particular. Requiere autenticación."
+      operationId: "removeGameFromMyCustomList"
+      parameters: 
+      - name: "listPublicId"
+        in: "path"
+        description: "ID público (UUID) de la lista de juegos de la cual se eliminará el juego."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      - name: "userGameInternalId"
+        in: "path"
+        description: "ID interno de la entrada 'UserGame' (juego en la biblioteca del usuario) a eliminar de la lista."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "101"
+      responses: 
+        204: 
+          description: "Juego eliminado de la lista exitosamente (o no se encontraba en ella). No hay contenido en la respuesta."
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El juego que se intenta eliminar de la lista no pertenece a la biblioteca del usuario autenticado (si esta verificación se realiza antes de intentar la eliminación de la lista)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La lista de juegos (`listPublicId`) o la entrada de juego (`userGameInternalId`) no fueron encontradas, o el usuario actual no pudo ser verificado. También podría ocurrir si el juego especificado no estaba en la lista para ser eliminado (aunque el servicio actual no lanza error por esto)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/tierlists/{tierListPublicId}/items/{tierListItemInternalId}: 
+    delete: 
+      tags: 
+      - "TierList Controller"
+      summary: "Eliminar un ítem (juego) de una Tier List de perfil"
+      description: "Permite al propietario autenticado eliminar un ítem específico (identificado por `tierListItemInternalId`) de una de sus Tier Lists de tipo 'PROFILE_GLOBAL'. Esto no elimina el juego de la biblioteca general del usuario, solo de esta Tier List. No se puede usar este endpoint para Tier Lists de tipo 'FROM_GAMELIST'. Requiere autenticación y ser propietario."
+      operationId: "removeItemFromTierList"
+      parameters: 
+      - name: "tierListPublicId"
+        in: "path"
+        description: "ID público (UUID) de la Tier List de la cual se eliminará el ítem."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      - name: "tierListItemInternalId"
+        in: "path"
+        description: "ID interno (Long) del TierListItem a eliminar de la Tier List."
+        required: "true"
+        schema: 
+          type: "integer"
+          format: "int64"
+        example: "201"
+      responses: 
+        200: 
+          description: "Ítem eliminado exitosamente de la Tier List. Devuelve la Tier List completa y actualizada."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/TierListResponseDTO"
+        400: 
+          description: "Solicitud incorrecta. No se pueden eliminar ítems de una Tier List de tipo 'FROM_GAMELIST' a través de este endpoint."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el propietario de la Tier List."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. La Tier List, o el ítem específico dentro de ella, no fueron encontrados para el usuario actual, o el usuario no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/friends/{friendUserPublicId}: 
+    delete: 
+      tags: 
+      - "Friendship Controller"
+      summary: "Eliminar un amigo"
+      description: "Permite al usuario autenticado eliminar una amistad existente con otro usuario, especificado por su ID público. La relación de amistad es eliminada de la base de datos. Requiere autenticación."
+      operationId: "removeFriend"
+      parameters: 
+      - name: "friendUserPublicId"
+        in: "path"
+        description: "ID público (UUID) del amigo que se desea eliminar."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "e0f1a2b3-c4d5-6789-0123-abcdef123456"
+      responses: 
+        204: 
+          description: "Amigo eliminado exitosamente. No hay contenido en la respuesta."
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        404: 
+          description: "No encontrado. No se encontró una amistad con el usuario especificado, o el amigo a eliminar no existe, o el usuario actual no pudo ser verificado."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+  /api/v1/friends/requests/decline/{requesterUserPublicId}: 
+    delete: 
+      tags: 
+      - "Friendship Controller"
+      summary: "Rechazar o cancelar una solicitud de amistad pendiente"
+      description: "Permite al usuario autenticado (que es el receptor de la solicitud) rechazar una solicitud de amistad pendiente. Alternativamente, si el usuario autenticado fue quien envió la solicitud y esta aún está pendiente, puede usar este endpoint para cancelarla (aunque semánticamente esto último podría ser un endpoint diferente, la lógica actual del servicio elimina la solicitud PENDIENTE). La solicitud de amistad es eliminada de la base de datos. Requiere autenticación."
+      operationId: "declineOrCancelFriendRequest"
+      parameters: 
+      - name: "requesterUserPublicId"
+        in: "path"
+        description: "ID público (UUID) del usuario que originalmente envió la solicitud de amistad que se desea rechazar/cancelar."
+        required: "true"
+        schema: 
+          type: "string"
+          format: "uuid"
+        example: "d7e8f9a0-b1c2-3456-7890-abcdef123456"
+      responses: 
+        204: 
+          description: "Solicitud de amistad rechazada/cancelada y eliminada exitosamente. No hay contenido en la respuesta."
+        401: 
+          description: "No autorizado. El token JWT es inválido, ha expirado o no se proporcionó."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        403: 
+          description: "Prohibido. El usuario autenticado no es el receptor de la solicitud de amistad pendiente que intenta rechazar (o no tiene permisos para cancelarla si fuera el emisor y el endpoint se usara así)."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        404: 
+          description: "No encontrado. No se encontró una solicitud de amistad pendiente del usuario especificado, o el usuario solicitante/actual no existe."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+        500: 
+          description: "Error interno del servidor."
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponse"
+      security: 
+      -
+        bearerAuth: 
+components: 
+  schemas: 
+    ErrorResponse: 
+      type: "object"
+      properties: 
+        error: 
+          type: "string"
+          description: "Mensaje detallado del error."
+          example: "El recurso solicitado no fue encontrado."
+      description: "Respuesta de error genérica para errores 4xx y 5xx."
+    ValidationErrorResponse: 
+      type: "object"
+      properties: 
+        errors: 
+          type: "array"
+          description: "Lista de mensajes de error de validación."
+          example: 
+            - "El nombre de usuario es obligatorio" 
+            - "El email debe ser válido"
+          items: 
+            type: "string"
+      description: "Respuesta específica para errores de validación de campos (HTTP 400)."
+    DuplicatedResourceResponse: 
+      type: "object"
+      properties: 
+        message: 
+          type: "string"
+          description: "Mensaje de error indicando que el recurso ya existe."
+          example: "El usuario ya existe."
+      description: "Respuesta específica para errores de recursos duplicados (HTTP 409)."
+    UnauthorizedResponse: 
+      type: "object"
+      properties: 
+        message: 
+          type: "string"
+          description: "Mensaje de error indicando que la autenticación falló."
+          example: "No autorizado. Token inválido o expirado. O contraseña incorrecta"
+      description: "Respuesta específica para errores de autorización (HTTP 401)."
+    ValidationPasswordErrorResponse: 
+      type: "object"
+      properties: 
+        errors: 
+          type: "array"
+          description: "Lista de mensajes de error de validación."
+          example: 
+            - "La contraseña no debe ser igual a la anterior" 
+            - "La nueva contraseña debe tener entre 8 y 100 caracteres"
+          items: 
+            type: "string"
+      description: "Respuesta específica para errores de validación de campos (HTTP 400)."
+    RequiredErrorResponse: 
+      type: "object"
+      properties: 
+        errors: 
+          type: "array"
+          description: "Mensaje de error generico"
+          example: "El recurso es obligatorio."
+          items: 
+            type: "string"
+      description: "Respuesta específica para errores de validación de campos (HTTP 400)."
+    TooLargeResponse: 
+      type: "object"
+      properties: 
+        errors: 
+          type: "array"
+          description: "Mensaje de error para imagenes"
+          example: "El recurso es demasiado grande. El tamaño máximo permitido es de 500KB."
+          items: 
+            type: "string"
+      description: "Respuesta específica para errores de validación de campos (HTTP 413)."
+    UserProfileUpdateDTO: 
+      required: 
+      - "notificaciones"
+      type: "object"
+      properties: 
+        nombre_usuario: 
+          maxLength: "100"
+          minLength: "3"
+          type: "string"
+          description: "Nuevo nombre de usuario para la cuenta. Si se proporciona, debe tener entre 3 y 100 caracteres. Si no se envía o es nulo, no se actualiza."
+          nullable: "true"
+          example: "usuarioActualizado"
+        tema: 
+          type: "string"
+          description: "Nuevo tema de la interfaz preferido por el usuario. Si no se envía o es nulo, no se actualiza."
+          nullable: "true"
+          example: "OSCURO"
+          enum: 
+          - "CLARO"
+          - "OSCURO"
+          - "CLARO"
+          - "OSCURO"
+        foto_perfil: 
+          type: "string"
+          description: "Nueva URL de la foto de perfil del usuario. Este campo normalmente se actualiza a través del endpoint de subida de imágenes. Si se proporciona aquí, debería ser una URL válida a una imagen ya alojada. Si no se envía o es nulo, no se actualiza."
+          nullable: "true"
+          example: "/profile-pictures/nuevo_id_usuario.png"
+        notificaciones: 
+          type: "boolean"
+          description: "Preferencia para recibir notificaciones. Si se envía, no puede ser nulo."
+          nullable: "true"
+          example: "false"
+        visibilidad_perfil: 
+          type: "string"
+          description: "Nuevo nivel de visibilidad del perfil del usuario. Si no se envía o es nulo, no se actualiza."
+          nullable: "true"
+          example: "SOLO_AMIGOS"
+          enum: 
+          - "PUBLICO"
+          - "PRIVADO"
+          - "SOLO_AMIGOS"
+          - "PUBLICO"
+          - "PRIVADO"
+          - "SOLO_AMIGOS"
+      description: "DTO para actualizar el perfil de un usuario. Solo los campos presentes y no nulos (o que cumplan @NotNull) serán considerados para la actualización. Para campos como 'foto_perfil', enviar un nuevo valor actualiza, enviar null o no enviar el campo lo deja sin cambios."
+    UserDTO: 
+      type: "object"
+      properties: 
+        public_id: 
+          type: "string"
+          description: "Identificador público único del usuario, generado automáticamente."
+          format: "uuid"
+          readOnly: "true"
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        nombre_usuario: 
+          type: "string"
+          description: "Nombre de usuario elegido por el usuario."
+          example: "nuevoUsuario123"
+        email: 
+          type: "string"
+          description: "Dirección de correo electrónico del usuario."
+          format: "email"
+          example: "usuario@example.com"
+        fecha_registro: 
+          type: "string"
+          description: "Fecha y hora en que el usuario se registró en el sistema (formato ISO 8601)."
+          format: "date-time"
+          readOnly: "true"
+          example: "2024-05-25T10:15:30.123Z"
+        tema: 
+          type: "string"
+          description: "Tema de la interfaz preferido por el usuario."
+          example: "CLARO"
+          enum: 
+          - "CLARO"
+          - "OSCURO"
+          - "CLARO"
+          - "OSCURO"
+        foto_perfil: 
+          type: "string"
+          description: "URL relativa o absoluta de la foto de perfil del usuario. Puede ser nulo si no se ha subido ninguna."
+          nullable: "true"
+          example: "/profile-pictures/123e4567-e89b-12d3-a456-426614174000.jpg"
+        notificaciones: 
+          type: "boolean"
+          description: "Indica si el usuario desea recibir notificaciones. Por defecto es true."
+          example: "true"
+        visibilidad_perfil: 
+          type: "string"
+          description: "Nivel de visibilidad del perfil del usuario. Por defecto es PUBLICO."
+          example: "PUBLICO"
+          enum: 
+          - "PUBLICO"
+          - "PRIVADO"
+          - "SOLO_AMIGOS"
+          - "PUBLICO"
+          - "PRIVADO"
+          - "SOLO_AMIGOS"
+      description: "DTO que representa la información pública y de preferencias de un usuario. Se devuelve tras un registro o al solicitar datos de usuario."
+    PasswordChangeDTO: 
+      required: 
+      - "contraseña_actual"
+      - "nueva_contraseña"
+      type: "object"
+      properties: 
+        contraseña_actual: 
+          type: "string"
+          description: "La contraseña actual del usuario para verificación."
+          example: "ContraseñaActual123!"
+        nueva_contraseña: 
+          maxLength: "100"
+          minLength: "8"
+          type: "string"
+          description: "La nueva contraseña deseada para la cuenta. Debe tener entre 8 y 100 caracteres."
+          format: "password"
+          example: "NuevaContraseñaS3gur@"
+      description: "DTO para solicitar un cambio de contraseña. Requiere la contraseña actual del usuario y la nueva contraseña deseada."
+    GameListRequestDTO: 
+      required: 
+      - "is_public"
+      - "name"
+      type: "object"
+      properties: 
+        name: 
+          maxLength: "150"
+          minLength: "1"
+          type: "string"
+          description: "Nombre de la lista de juegos. Debe tener entre 1 y 150 caracteres."
+          example: "Mis Juegos Favoritos de RPG"
+        description: 
+          maxLength: "1000"
+          minLength: "0"
+          type: "string"
+          description: "Descripción opcional para la lista de juegos. Máximo 1000 caracteres."
+          nullable: "true"
+          example: "Una colección de los RPGs que más he disfrutado."
+        is_public: 
+          type: "boolean"
+          description: "Indica si la lista de juegos es pública (true) o privada (false)."
+          example: "false"
+      description: "DTO para crear o actualizar una lista de juegos personalizada."
+    GameListResponseDTO: 
+      type: "object"
+      properties: 
+        public_id: 
+          type: "string"
+          description: "ID público único de la lista de juegos."
+          format: "uuid"
+          readOnly: "true"
+          example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        name: 
+          type: "string"
+          description: "Nombre de la lista de juegos."
+          example: "Mis Juegos Favoritos de RPG"
+        description: 
+          type: "string"
+          description: "Descripción de la lista de juegos."
+          nullable: "true"
+          example: "Una colección de los RPGs que más he disfrutado."
+        is_public: 
+          type: "boolean"
+          description: "Indica si la lista de juegos es pública (true) o privada (false)."
+          example: "false"
+        owner_username: 
+          type: "string"
+          description: "Nombre de usuario del propietario de la lista."
+          readOnly: "true"
+          example: "usuarioEjemplo"
+        games_in_list: 
+          type: "array"
+          description: "Lista de juegos (entradas de la biblioteca del usuario) incluidos en esta lista. Puede estar vacía."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/UserGameResponseDTO"
+        game_count: 
+          type: "integer"
+          description: "Número total de juegos en la lista."
+          format: "int32"
+          readOnly: "true"
+          example: "5"
+        created_at: 
+          type: "string"
+          description: "Fecha y hora de creación de la lista (formato ISO 8601)."
+          format: "date-time"
+          readOnly: "true"
+          example: "2024-05-01T10:00:00Z"
+        updated_at: 
+          type: "string"
+          description: "Fecha y hora de la última actualización de la lista (formato ISO 8601)."
+          format: "date-time"
+          readOnly: "true"
+          example: "2024-05-15T14:30:00Z"
+      description: "DTO que representa una lista de juegos personalizada, incluyendo sus detalles y los juegos que contiene."
+    UserGameResponseDTO: 
+      type: "object"
+      properties: 
+        game_igdb_id: 
+          type: "integer"
+          description: "ID de IGDB del juego al que se refiere esta entrada de la biblioteca."
+          format: "int64"
+          example: "1020"
+        status: 
+          type: "string"
+          description: "Estado actual del juego en la biblioteca del usuario."
+          example: "COMPLETED_MAIN_STORY"
+          enum: 
+          - "COMPLETED"
+          - "COMPLETED_MAIN_STORY"
+          - "COMPLETED_MAIN_AND_SIDES"
+          - "COMPLETED_100_PERCENT"
+          - "ARCHIVED"
+          - "ARCHIVED_ABANDONED"
+          - "ARCHIVED_NOT_PLAYING"
+          - "WISHLIST"
+          - "PLAYING"
+          - "PLAYING_PAUSED"
+          - "PLAYING_ENDLESS"
+        personal_platform: 
+          type: "string"
+          description: "Plataforma personal en la que el usuario juega o posee el juego."
+          example: "PC_STEAM"
+          enum: 
+          - "STEAM"
+          - "EPIC_GAMES"
+          - "GOG_GALAXY"
+          - "XBOX"
+          - "PLAYSTATION"
+          - "NINTENDO"
+          - "BATTLE_NET"
+          - "EA_APP"
+          - "UBISOFT_CONNECT"
+          - "OTHER"
+        has_possession: 
+          type: "boolean"
+          description: "Indica si el usuario posee el juego."
+          example: "true"
+        score: 
+          maximum: "10"
+          minimum: "0"
+          type: "number"
+          description: "Puntuación personal otorgada por el usuario al juego."
+          format: "float"
+          example: "9"
+        comment: 
+          type: "string"
+          description: "Comentario público del usuario sobre el juego."
+          nullable: "true"
+          example: "Un clásico indispensable."
+        private_comment: 
+          type: "string"
+          description: "Comentario privado del usuario sobre el juego (no visible para otros)."
+          nullable: "true"
+          example: "Intentar el final alternativo en la próxima partida."
+        start_date: 
+          type: "string"
+          description: "Fecha en que el usuario comenzó a jugar (YYYY-MM-DD)."
+          format: "date"
+          nullable: "true"
+          example: "2023-05-10"
+        end_date: 
+          type: "string"
+          description: "Fecha en que el usuario terminó de jugar (YYYY-MM-DD)."
+          format: "date"
+          nullable: "true"
+          example: "2023-07-15"
+        story_duration_hours: 
+          type: "number"
+          description: "Horas dedicadas a la historia principal."
+          format: "float"
+          nullable: "true"
+          example: "55.5"
+        story_secondary_duration_hours: 
+          type: "number"
+          description: "Horas dedicadas a la historia principal y secundarias."
+          format: "float"
+          nullable: "true"
+          example: "80"
+        completionist_duration_hours: 
+          type: "number"
+          description: "Horas dedicadas para completar el juego al 100%."
+          format: "float"
+          nullable: "true"
+          example: "150"
+        created_at: 
+          type: "string"
+          description: "Fecha y hora de creación de esta entrada en la biblioteca."
+          format: "date-time"
+          readOnly: "true"
+          example: "2023-05-10T12:00:00Z"
+        updated_at: 
+          type: "string"
+          description: "Fecha y hora de la última actualización de esta entrada."
+          format: "date-time"
+          readOnly: "true"
+          example: "2023-07-15T18:30:00Z"
+      description: "DTO que representa una entrada en la biblioteca de juegos de un usuario, incluyendo sus datos personales sobre un juego específico."
+      nullable: "true"
+    TierListUpdateRequestDTO: 
+      type: "object"
+      properties: 
+        name: 
+          maxLength: "150"
+          minLength: "1"
+          type: "string"
+          description: "Nuevo nombre para la Tier List. Si se proporciona, debe tener entre 1 y 150 caracteres."
+          nullable: "true"
+          example: "Mis Juegos Indie Favoritos (Actualizado)"
+        description: 
+          maxLength: "1000"
+          minLength: "0"
+          type: "string"
+          description: "Nueva descripción para la Tier List. Si se proporciona, no puede exceder los 1000 caracteres."
+          nullable: "true"
+          example: "Una lista actualizada de mis juegos indie preferidos."
+        is_public: 
+          type: "boolean"
+          description: "Nuevo estado de visibilidad para la Tier List (true para pública, false para privada). Si se proporciona, se actualizará el estado."
+          nullable: "true"
+          example: "true"
+      description: "DTO para actualizar los metadatos de una Tier List existente (nombre, descripción, visibilidad). Solo los campos proporcionados (no nulos) serán actualizados."
+    TierListItemGameInfoDTO: 
+      type: "object"
+      properties: 
+        tier_list_item_id: 
+          type: "integer"
+          format: "int64"
+        user_game_id: 
+          type: "integer"
+          format: "int64"
+        game_igdb_id: 
+          type: "integer"
+          format: "int64"
+        game_name: 
+          type: "string"
+        game_cover_url: 
+          type: "string"
+        item_order: 
+          type: "integer"
+          format: "int32"
+    TierListResponseDTO: 
+      type: "object"
+      properties: 
+        public_id: 
+          type: "string"
+          description: "ID público único de la Tier List."
+          format: "uuid"
+          readOnly: "true"
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        name: 
+          type: "string"
+          description: "Nombre de la Tier List."
+          example: "Ranking de Juegos de Pelea"
+        description: 
+          type: "string"
+          description: "Descripción detallada de la Tier List."
+          nullable: "true"
+          example: "Mi ranking personal de juegos de pelea basado en su impacto y jugabilidad."
+        type: 
+          type: "string"
+          description: "Tipo de Tier List (ej. general de perfil o basada en una GameList)."
+          readOnly: "true"
+          example: "PROFILE_GLOBAL"
+          enum: 
+          - "PROFILE_GLOBAL"
+          - "FROM_GAMELIST"
+        source_game_list_public_id: 
+          type: "string"
+          description: "ID público de la GameList origen, si esta Tier List se generó a partir de una. Nulo para Tier Lists de perfil global."
+          format: "uuid"
+          nullable: "true"
+          readOnly: "true"
+          example: "b2c3d4e5-f6a7-8901-2345-67890abcdef1"
+        owner_username: 
+          type: "string"
+          description: "Nombre de usuario del propietario de la Tier List."
+          readOnly: "true"
+          example: "jugadorExperto"
+        is_public: 
+          type: "boolean"
+          description: "Indica si la Tier List es pública (true) o privada (false)."
+          example: "true"
+        sections: 
+          type: "array"
+          description: "Lista de secciones (tiers) definidas por el usuario, ordenadas. No incluye la sección 'Sin Clasificar'."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/TierSectionResponseDTO"
+        unclassified_section: 
+          $ref: "#/components/schemas/TierSectionResponseDTO"
+        created_at: 
+          type: "string"
+          description: "Fecha y hora de creación de la Tier List (formato ISO 8601)."
+          format: "date-time"
+          readOnly: "true"
+          example: "2024-05-20T10:00:00Z"
+        updated_at: 
+          type: "string"
+          description: "Fecha y hora de la última actualización de la Tier List (formato ISO 8601)."
+          format: "date-time"
+          readOnly: "true"
+          example: "2024-05-21T15:30:00Z"
+      description: "DTO que representa una Tier List, incluyendo sus secciones y los ítems (juegos) clasificados en ellas."
+    TierSectionResponseDTO: 
+      type: "object"
+      properties: 
+        internal_id: 
+          type: "integer"
+          format: "int64"
+        name: 
+          type: "string"
+        order: 
+          type: "integer"
+          format: "int32"
+        is_default_unclassified: 
+          type: "boolean"
+        items: 
+          type: "array"
+          items: 
+            $ref: "#/components/schemas/TierListItemGameInfoDTO"
+      description: "Sección especial para ítems (juegos) que aún no han sido clasificados en ninguna tier. Contiene el nombre 'Juegos por Clasificar' y orden 0."
+      nullable: "true"
+    TierSectionRequestDTO: 
+      required: 
+      - "name"
+      type: "object"
+      properties: 
+        name: 
+          maxLength: "100"
+          minLength: "1"
+          type: "string"
+          description: "Nombre de la nueva sección (tier). Debe tener entre 1 y 100 caracteres."
+          example: "S Tier"
+      description: "DTO para solicitar la creación de una nueva sección (tier) dentro de una Tier List."
+    TierListItemMoveRequestDTO: 
+      required: 
+      - "new_order"
+      - "target_section_internal_id"
+      type: "object"
+      properties: 
+        target_section_internal_id: 
+          type: "integer"
+          description: "ID interno de la sección (tier) destino a la que se moverá el ítem. Es obligatorio."
+          format: "int64"
+          example: "103"
+        new_order: 
+          type: "integer"
+          description: "Nueva posición (orden basado en cero) para el ítem dentro de la sección destino. Es obligatorio."
+          format: "int32"
+          example: "0"
+      description: "DTO para especificar el movimiento de un ítem (juego) a una nueva sección y/o posición dentro de una Tier List."
+    FriendshipResponseDTO: 
+      type: "object"
+      properties: 
+        friendship_id: 
+          type: "integer"
+          description: "ID interno de la relación de amistad/solicitud."
+          format: "int64"
+          example: "101"
+        user_public_id: 
+          type: "string"
+          description: "ID público del otro usuario en la relación (amigo o solicitante/receptor)."
+          format: "uuid"
+          example: "b2c3d4e5-f6a7-8901-2345-67890abcdef1"
+        username: 
+          type: "string"
+          description: "Nombre de usuario del otro usuario en la relación."
+          example: "amigoUsuario"
+        profile_picture_url: 
+          type: "string"
+          description: "URL de la foto de perfil del otro usuario. Puede ser nulo."
+          nullable: "true"
+          example: "/profile-pictures/b2c3d4e5-f6a7-8901-2345-67890abcdef1.jpg"
+        status: 
+          type: "string"
+          description: "Estado actual de la amistad o solicitud."
+          example: "PENDING"
+          enum: 
+          - "PENDING"
+          - "ACCEPTED"
+          - "DECLINED"
+          - "BLOCKED"
+          - "PENDING"
+          - "ACCEPTED"
+          - "DECLINED"
+          - "BLOCKED"
+        is_initiated_by_current_user: 
+          type: "boolean"
+          description: "Indica si el usuario autenticado fue quien inició originalmente la solicitud de amistad. True si el usuario actual es el 'requester', False si es el 'receiver'."
+          example: "true"
+        created_at: 
+          type: "string"
+          description: "Fecha y hora de creación de la solicitud o de cuando se estableció la amistad."
+          format: "date-time"
+          example: "2024-05-27T10:00:00Z"
+        updated_at: 
+          type: "string"
+          description: "Fecha y hora de la última actualización del estado (ej. aceptación)."
+          format: "date-time"
+          example: "2024-05-27T10:05:00Z"
+      description: "DTO que representa el estado de una amistad o solicitud de amistad."
+    UserCreateDTO: 
+      required: 
+      - "contraseña"
+      - "email"
+      - "nombre_usuario"
+      type: "object"
+      properties: 
+        nombre_usuario: 
+          maxLength: "100"
+          minLength: "3"
+          type: "string"
+          description: "Nombre de usuario único para la cuenta. Debe tener entre 3 y 100 caracteres."
+          example: "nuevoUsuario123"
+        email: 
+          maxLength: "255"
+          minLength: "0"
+          type: "string"
+          description: "Dirección de correo electrónico del usuario. Debe ser única y tener un formato válido."
+          format: "email"
+          example: "usuario@example.com"
+        contraseña: 
+          maxLength: "100"
+          minLength: "8"
+          type: "string"
+          description: "Contraseña para la cuenta del usuario. Debe tener entre 8 y 100 caracteres."
+          format: "password"
+          example: "ContraseñaS3gur@"
+      description: "DTO para la creación de un nuevo usuario. Contiene los campos obligatorios para el registro."
+    TierListCreateRequestDTO: 
+      required: 
+      - "name"
+      type: "object"
+      properties: 
+        name: 
+          maxLength: "150"
+          minLength: "1"
+          type: "string"
+          description: "Nombre de la Tier List. Debe tener entre 1 y 150 caracteres."
+          example: "Mis Personajes Favoritos de Street Fighter"
+        description: 
+          maxLength: "1000"
+          minLength: "0"
+          type: "string"
+          description: "Descripción opcional para la Tier List. Máximo 1000 caracteres."
+          nullable: "true"
+          example: "Clasificación personal de personajes basada en su jugabilidad."
+        is_public: 
+          type: "boolean"
+          description: "Indica si la Tier List será pública (true) o privada (false). Por defecto es false (privada)."
+          nullable: "true"
+          example: "false"
+      description: "DTO para crear una nueva Tier List. Se utiliza principalmente para Tier Lists de perfil."
+    UserGameDataDTO: 
+      type: "object"
+      properties: 
+        status: 
+          type: "string"
+          description: "Estado del juego en la biblioteca del usuario (ej. JUGANDO, COMPLETADO)."
+          nullable: "true"
+          example: "PLAYING"
+          enum: 
+          - "COMPLETED"
+          - "COMPLETED_MAIN_STORY"
+          - "COMPLETED_MAIN_AND_SIDES"
+          - "COMPLETED_100_PERCENT"
+          - "ARCHIVED"
+          - "ARCHIVED_ABANDONED"
+          - "ARCHIVED_NOT_PLAYING"
+          - "WISHLIST"
+          - "PLAYING"
+          - "PLAYING_PAUSED"
+          - "PLAYING_ENDLESS"
+        personal_platform: 
+          type: "string"
+          description: "Plataforma personal en la que el usuario juega o posee el juego."
+          nullable: "true"
+          example: "STEAM"
+          enum: 
+          - "STEAM"
+          - "EPIC_GAMES"
+          - "GOG_GALAXY"
+          - "XBOX"
+          - "PLAYSTATION"
+          - "NINTENDO"
+          - "BATTLE_NET"
+          - "EA_APP"
+          - "UBISOFT_CONNECT"
+          - "OTHER"
+        has_possession: 
+          type: "boolean"
+          description: "Indica si el usuario posee físicamente o digitalmente el juego."
+          nullable: "true"
+          example: "true"
+        score: 
+          maximum: "10"
+          minimum: "0"
+          type: "number"
+          description: "Puntuación personal otorgada por el usuario al juego (ej. de 0.0 a 10.0)."
+          format: "float"
+          nullable: "true"
+          example: "8.5"
+        comment: 
+          maxLength: "2000"
+          minLength: "0"
+          type: "string"
+          description: "Comentario público del usuario sobre el juego. Máximo 2000 caracteres."
+          nullable: "true"
+          example: "¡Un gran juego!"
+        private_comment: 
+          maxLength: "2000"
+          minLength: "0"
+          type: "string"
+          description: "Comentario privado del usuario sobre el juego (solo visible para él). Máximo 2000 caracteres."
+          nullable: "true"
+          example: "Recordar farmear X item."
+        start_date: 
+          type: "string"
+          description: "Fecha en la que el usuario comenzó a jugar el juego (formato YYYY-MM-DD)."
+          format: "date"
+          nullable: "true"
+          example: "2024-01-15"
+        end_date: 
+          type: "string"
+          description: "Fecha en la que el usuario terminó de jugar el juego (formato YYYY-MM-DD)."
+          format: "date"
+          nullable: "true"
+          example: "2024-03-20"
+        story_duration_hours: 
+          minimum: "0"
+          type: "number"
+          description: "Duración estimada en horas para completar la historia principal."
+          format: "float"
+          nullable: "true"
+          example: "40.5"
+        story_secondary_duration_hours: 
+          minimum: "0"
+          type: "number"
+          description: "Duración estimada en horas para completar la historia principal y misiones secundarias importantes."
+          format: "float"
+          nullable: "true"
+          example: "65"
+        completionist_duration_hours: 
+          minimum: "0"
+          type: "number"
+          description: "Duración estimada en horas para completar el juego al 100%."
+          format: "float"
+          nullable: "true"
+          example: "120"
+      description: "DTO para proporcionar o actualizar los datos específicos de un usuario para un juego en su biblioteca."
+    AddGameToCustomListRequestDTO: 
+      required: 
+      - "user_game_id"
+      type: "object"
+      properties: 
+        user_game_id: 
+          type: "integer"
+          description: "ID interno de la entrada 'UserGame' (juego en la biblioteca del usuario) que se desea añadir a la lista. Es obligatorio."
+          format: "int64"
+          example: "101"
+      description: "DTO para añadir un juego existente de la biblioteca del usuario a una lista de juegos personalizada."
+    TierListItemAddRequestDTO: 
+      required: 
+      - "user_game_id"
+      type: "object"
+      properties: 
+        user_game_id: 
+          type: "integer"
+          description: "ID interno de la entrada 'UserGame' (juego en la biblioteca del usuario) que se desea añadir o mover. Es obligatorio."
+          format: "int64"
+          example: "101"
+        order: 
+          type: "integer"
+          description: "Posición (orden basado en cero) deseada para el ítem dentro de la sección destino. Si es nulo o está fuera de rango, el ítem se añadirá al final de la sección. Opcional."
+          format: "int32"
+          nullable: "true"
+          example: "0"
+      description: "DTO para añadir un ítem (juego de la biblioteca del usuario) a una sección de una Tier List."
+    ResetPasswordDTO: 
+      required: 
+      - "nueva_contraseña"
+      - "token"
+      type: "object"
+      properties: 
+        token: 
+          type: "string"
+          description: "El token de restablecimiento único que el usuario recibió por correo electrónico."
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        nueva_contraseña: 
+          maxLength: "100"
+          minLength: "8"
+          type: "string"
+          description: "La nueva contraseña deseada para la cuenta. Debe tener entre 8 y 100 caracteres."
+          format: "password"
+          example: "NuevaContraseñaS3gur@!"
+      description: "DTO para la solicitud de restablecimiento de contraseña. Contiene el token recibido por email y la nueva contraseña."
+    LoginRequestDTO: 
+      required: 
+      - "contraseña"
+      - "identificador"
+      type: "object"
+      properties: 
+        identificador: 
+          type: "string"
+          description: "Identificador del usuario, puede ser su email o su nombre de usuario."
+          example: "usuario123"
+        contraseña: 
+          type: "string"
+          description: "Contraseña del usuario."
+          format: "password"
+          example: "P@$$wOrd"
+      description: "DTO para la solicitud de inicio de sesión. Requiere un identificador (email o nombre de usuario) y una contraseña."
+    JwtResponseDTO: 
+      type: "object"
+      properties: 
+        token_acceso: 
+          type: "string"
+          description: "Token de acceso JWT generado para el usuario autenticado."
+          example: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c3VhcmlvQGV4YW1wbGUuY29tIiwiaWF0IjoxNj..."
+        tipo_token: 
+          type: "string"
+          description: "Tipo de token, generalmente 'Bearer'."
+          example: "Bearer"
+      description: "DTO para la respuesta de inicio de sesión exitoso. Contiene el token de acceso JWT."
+    ForgotPasswordDTO: 
+      required: 
+      - "email"
+      type: "object"
+      properties: 
+        email: 
+          type: "string"
+          description: "Correo electrónico del usuario que solicita el restablecimiento de contraseña. Debe ser un formato de email válido."
+          format: "email"
+          example: "usuario@example.com"
+      description: "DTO para la solicitud de restablecimiento de contraseña. Requiere el correo electrónico asociado a la cuenta."
+    UserSearchResultDTO: 
+      type: "object"
+      properties: 
+        public_id: 
+          type: "string"
+          description: "ID público del usuario encontrado."
+          format: "uuid"
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        nombre_usuario: 
+          type: "string"
+          description: "Nombre de usuario del usuario encontrado."
+          example: "juanPerez"
+        foto_perfil: 
+          type: "string"
+          description: "URL de la foto de perfil del usuario encontrado. Puede ser nulo."
+          nullable: "true"
+          example: "/profile-pictures/a1b2c3d4-e5f6-7890-1234-567890abcdef.png"
+      description: "DTO que representa un resultado de búsqueda de usuario, mostrando información pública básica."
+    ArtworkDto: 
+      type: "object"
+      properties: 
+        url: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Información de los artes del juego."
+      nullable: "true"
+    CompanyInfoDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+    CoverDto: 
+      type: "object"
+      properties: 
+        url: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+    DlcInfoDto: 
+      type: "object"
+      properties: 
+        cover: 
+          $ref: "#/components/schemas/CoverDto"
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+        total_rating: 
+          type: "number"
+          format: "double"
+        game_type: 
+          type: "string"
+          enum: 
+          - "0"
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "11"
+          - "12"
+          - "13"
+          - "14"
+          - "15"
+        slug: 
+          type: "string"
+      description: "Lista de remasters de este juego."
+      nullable: "true"
+    FranchiseDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Franquicias a las que pertenece el juego."
+      nullable: "true"
+    GameDetailDTO: 
+      type: "object"
+      properties: 
+        game_info: 
+          $ref: "#/components/schemas/GameDto"
+        user_game_data: 
+          $ref: "#/components/schemas/UserGameResponseDTO"
+        public_comments: 
+          type: "array"
+          description: "Lista de comentarios públicos realizados por otros usuarios sobre este juego. Puede estar vacía si no hay comentarios o si el juego no existe en la base de datos local para asociar comentarios."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/PublicGameCommentDTO"
+      description: "DTO que contiene los detalles completos de un juego, incluyendo información general, datos específicos del usuario (si está autenticado y el juego está en su biblioteca), y comentarios públicos."
+    GameDto: 
+      type: "object"
+      properties: 
+        cover: 
+          $ref: "#/components/schemas/CoverDto"
+        genres: 
+          type: "array"
+          description: "Géneros a los que pertenece el juego (ej. RPG, Acción)."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/GenreDto"
+        name: 
+          type: "string"
+          description: "Nombre completo del juego."
+          example: "The Legend of Zelda: Breath of the Wild"
+        slug: 
+          type: "string"
+          description: "Identificador URL amigable del juego."
+          nullable: "true"
+          example: "the-legend-of-zelda-breath-of-the-wild"
+        summary: 
+          type: "string"
+          description: "Resumen o sinopsis del juego."
+          nullable: "true"
+          example: "Una aventura épica en un vasto mundo abierto..."
+        storyline: 
+          type: "string"
+          description: "Argumento o historia principal del juego."
+          nullable: "true"
+          example: "Link despierta después de 100 años..."
+        id: 
+          type: "integer"
+          description: "ID único del juego en IGDB."
+          format: "int64"
+          example: "1020"
+        game_modes: 
+          type: "array"
+          description: "Modos de juego disponibles (ej. Un jugador, Multijugador)."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/GameModeDto"
+        artworks: 
+          type: "array"
+          description: "Información de los artes del juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/ArtworkDto"
+        first_release_date: 
+          type: "integer"
+          description: "Fecha del primer lanzamiento del juego (timestamp Unix en segundos)."
+          format: "int64"
+          nullable: "true"
+          example: "1488499200"
+        first_release_status: 
+          type: "string"
+          description: "Estado de lanzamiento del juego."
+          nullable: "true"
+          enum: 
+          - "0"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "-1"
+        franchises: 
+          type: "array"
+          description: "Franquicias a las que pertenece el juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/FranchiseDto"
+        game_engines: 
+          type: "array"
+          description: "Motores de juego utilizados."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/GameEngineDto"
+        keywords: 
+          type: "array"
+          description: "Palabras clave asociadas al juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/KeywordDto"
+        platforms: 
+          type: "array"
+          description: "Plataformas en las que el juego está disponible."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/PlatformDto"
+        screenshots: 
+          type: "array"
+          description: "Capturas de pantalla del juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/ScreenshotDto"
+        websites: 
+          type: "array"
+          description: "Sitios web relacionados con el juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/WebsiteDto"
+        videos: 
+          type: "array"
+          description: "Vídeos relacionados con el juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/VideoDto"
+        total_rating: 
+          type: "number"
+          description: "Calificación total del juego (promedio de usuarios/críticos)."
+          format: "double"
+          nullable: "true"
+          example: "97"
+        total_rating_count: 
+          type: "integer"
+          description: "Número total de calificaciones recibidas."
+          format: "int32"
+          nullable: "true"
+          example: "2500"
+        themes: 
+          type: "array"
+          description: "Temas principales del juego (ej. Fantasía, Ciencia Ficción)."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/ThemeDto"
+        game_type: 
+          type: "string"
+          description: "Tipo de juego (ej. JUEGO_PRINCIPAL, DLC, EXPANSION)."
+          example: "GAME"
+          enum: 
+          - "0"
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "11"
+          - "12"
+          - "13"
+          - "14"
+          - "15"
+        parent_game: 
+          $ref: "#/components/schemas/DlcInfoDto"
+        dlcs: 
+          type: "array"
+          description: "Lista de DLCs para este juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/DlcInfoDto"
+        expansions: 
+          type: "array"
+          description: "Lista de expansiones para este juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/DlcInfoDto"
+        bundles: 
+          type: "array"
+          description: "Lista de paquetes/bundles que incluyen este juego o de los que este juego forma parte."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/DlcInfoDto"
+        version_parent: 
+          $ref: "#/components/schemas/DlcInfoDto"
+        remakes: 
+          type: "array"
+          description: "Lista de remakes de este juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/DlcInfoDto"
+        remasters: 
+          type: "array"
+          description: "Lista de remasters de este juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/DlcInfoDto"
+        similar_games: 
+          type: "array"
+          description: "Lista de juegos similares a este."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/SimilarGameInfoDto"
+        involved_companies: 
+          type: "array"
+          description: "Compañías involucradas en el desarrollo/publicación del juego."
+          nullable: "true"
+          items: 
+            $ref: "#/components/schemas/InvolvedCompanyDto"
+        game_status: 
+          $ref: "#/components/schemas/GameStatusDto"
+    GameEngineDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Motores de juego utilizados."
+      nullable: "true"
+    GameModeDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Modos de juego disponibles (ej. Un jugador, Multijugador)."
+      nullable: "true"
+    GameStatusDto: 
+      type: "object"
+      properties: 
+        id: 
+          type: "integer"
+          format: "int32"
+      description: "Estado numérico del juego según IGDB (mapeado a ReleaseStatus)."
+      nullable: "true"
+    GenreDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Géneros a los que pertenece el juego (ej. RPG, Acción)."
+      nullable: "true"
+    InvolvedCompanyDto: 
+      type: "object"
+      properties: 
+        company: 
+          $ref: "#/components/schemas/CompanyInfoDto"
+        developer: 
+          type: "boolean"
+        porting: 
+          type: "boolean"
+        publisher: 
+          type: "boolean"
+        supporting: 
+          type: "boolean"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Compañías involucradas en el desarrollo/publicación del juego."
+      nullable: "true"
+    KeywordDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Palabras clave asociadas al juego."
+      nullable: "true"
+    PlatformDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+        alternative_name: 
+          type: "string"
+        platform_logo: 
+          $ref: "#/components/schemas/PlatformLogoDto"
+      description: "Plataformas en las que el juego está disponible."
+      nullable: "true"
+    PlatformLogoDto: 
+      type: "object"
+      properties: 
+        url: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+    PublicGameCommentDTO: 
+      type: "object"
+      properties: 
+        username: 
+          type: "string"
+        user_public_id: 
+          type: "string"
+          format: "uuid"
+        comment_text: 
+          type: "string"
+        comment_date: 
+          type: "string"
+          format: "date-time"
+      description: "Lista de comentarios públicos realizados por otros usuarios sobre este juego. Puede estar vacía si no hay comentarios o si el juego no existe en la base de datos local para asociar comentarios."
+      nullable: "true"
+    ScreenshotDto: 
+      type: "object"
+      properties: 
+        url: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Capturas de pantalla del juego."
+      nullable: "true"
+    SimilarGameInfoDto: 
+      type: "object"
+      properties: 
+        cover: 
+          $ref: "#/components/schemas/CoverDto"
+        name: 
+          type: "string"
+        slug: 
+          type: "string"
+        summary: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+        total_rating: 
+          type: "number"
+          format: "double"
+      description: "Lista de juegos similares a este."
+      nullable: "true"
+    ThemeDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Temas principales del juego (ej. Fantasía, Ciencia Ficción)."
+      nullable: "true"
+    VideoDto: 
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+        video_id: 
+          type: "string"
+      description: "Vídeos relacionados con el juego."
+      nullable: "true"
+    WebsiteDto: 
+      type: "object"
+      properties: 
+        url: 
+          type: "string"
+        id: 
+          type: "integer"
+          format: "int64"
+      description: "Sitios web relacionados con el juego."
+      nullable: "true"
+    AccountDeleteDTO: 
+      required: 
+      - "contraseña_actual"
+      type: "object"
+      properties: 
+        contraseña_actual: 
+          type: "string"
+          description: "La contraseña actual del usuario. Es necesaria para verificar la identidad antes de programar la eliminación de la cuenta."
+          example: "ContraseñaActual123!"
+      description: "DTO utilizado para confirmar la solicitud de eliminación de cuenta. Requiere la contraseña actual del usuario."
+  securitySchemes: 
+    bearerAuth: 
+      type: "http"
+      name: "bearerAuth"
+      scheme: "bearer"
+      bearerFormat: "JWT"

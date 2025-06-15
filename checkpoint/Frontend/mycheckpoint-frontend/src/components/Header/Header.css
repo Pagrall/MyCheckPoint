@@ -1,0 +1,385 @@
+/* Contenedor Principal del Header */
+.main-header {
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  backdrop-filter: blur(30px);
+  box-shadow: 
+    /* Sombra derecha (azul): más grande y extendida */
+    49.7vw 0px 40px 10px rgba(33, 187, 214, 0.4),
+     
+    /* Sombra izquierda (rosa): más grande y extendida */
+    -49.7vw 0px 40px 10px rgba(248, 31, 150, 0.4);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Diseño del Header */
+.header-content {
+  display: flex;
+  align-items: center;
+  height: 6rem;
+  padding: 0 1.5rem;
+  justify-content: space-between;
+}
+
+/* Sección del Logo */
+.logo-container {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 75px;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* Transiciones y Animaciones del Logo */
+.logo svg path {
+  transition: fill 0.3s ease-in-out;
+}
+
+/* Transición suave para todos los paths del logo */
+.logo-container :deep(.logo svg path) {
+  transition: fill 0.1s ease-in-out;
+}
+
+/* Cuando se pasa el ratón por encima O se mantiene pulsado, aplicamos los cambios */
+
+.logo-container:hover :deep(.logo #Vector_9),
+.logo-container:active :deep(.logo #Vector_9) {
+  fill: url(#DegradadoHover);
+}
+
+.logo-container:hover :deep(.logo #Vector),
+.logo-container:hover :deep(.logo #Vector_2),
+.logo-container:active :deep(.logo #Vector),
+.logo-container:active :deep(.logo #Vector_2) {
+  fill: #7348D1;
+}
+
+.logo-container:hover :deep(.logo #mandoColor path),
+.logo-container:active :deep(.logo #mandoColor path) {
+  fill: #4C269D;
+}
+
+.logo-container:hover :deep(.logo #Vector_3),
+.logo-container:hover :deep(.logo #Vector_4),
+.logo-container:hover :deep(.logo #Vector_5),
+.logo-container:hover :deep(.logo #Vector_6),
+.logo-container:active :deep(.logo #Vector_3),
+.logo-container:active :deep(.logo #Vector_4),
+.logo-container:active :deep(.logo #Vector_5),
+.logo-container:active :deep(.logo #Vector_6) {
+  fill: #F81F96;
+}
+
+.logo-container:hover :deep(.logo #Vector_7),
+.logo-container:active :deep(.logo #Vector_7) {
+  fill: url(#DegradadoBigoteHover);
+}
+
+.logo-container:hover :deep(.logo #Vector_8),
+.logo-container:active :deep(.logo #Vector_8) {
+  fill: #00D2E0;
+}
+
+/* Título de la Aplicación */
+.app-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+/* Navegación Principal */
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-grow: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Enlaces de Navegación */
+.header-content a{
+  background-color: transparent;
+  border-radius: 0;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--color-azul);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  transition: color 0.2s, background-color 0.2s;
+  white-space: nowrap;
+  font-size: 1.5rem;
+}
+
+nav a:hover,
+nav a.router-link-exact-active {
+  color: var(--color-rosa);
+  background-color: transparent;
+  border-radius: 0;
+}
+
+/* Contenedor de Acciones */
+.actions-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 0 0 auto;
+}
+
+/* Sección de Búsqueda y Filtros */
+.search-container {
+  display: flex;
+}
+.search-container input {
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text);
+  padding: 0.5rem;
+  border-radius: 4px 0 0 4px;
+  width: 200px;
+}
+.search-container button {
+  background: var(--color-background-mute);
+  border: 1px solid var(--color-border);
+  border-left: none;
+  cursor: pointer;
+  padding: 0 0.75rem;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-container button:hover {
+  background: var(--color-border);
+}
+
+.filter-toggle-button {
+  background: none;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  color: var(--color-text-light-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.filter-toggle-button:hover {
+    scale: 1.4;
+}
+
+.filter-icon {
+  width: 30px;  /* Ajusta el tamaño según necesites */
+  height: 30px; /* Ajusta el tamaño según necesites */
+  
+  /* Aquí está la magia: usamos tu SVG como fondo */
+  background-image: url('/src/assets/icons/Fillter_Icon.svg');
+  background-size: contain; /* Asegura que la imagen quepa completa */
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-search{
+  width: 35px;  /* Ajusta el tamaño según necesites */
+  height: 35px; /* Ajusta el tamaño según necesites */
+  
+  /* Aquí está la magia: usamos tu SVG como fondo */
+  background-image: url('/src/assets/icons/search_icon.svg');
+  background-size: contain; /* Asegura que la imagen quepa completa */
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+
+/* Menú de Usuario */
+.user-menu-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.user-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 12px;
+  background-color: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 160px;
+  z-index: 101;
+  overflow: hidden;
+}
+.dropdown-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.dropdown-item:hover {
+  background-color: var(--color-background-mute);
+  color: var(--color-heading);
+}
+.dropdown-item.logout { color: #ff5b5b; }
+.dropdown-item.logout:hover { background-color: #ff5b5b; color: white; }
+
+.user-auth-group, .user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.user-profile-link {
+  display: flex;
+  align-items: center;
+}
+.user-avatar-header {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+.user-avatar-header:hover {
+  border-color: var(--color-azul);
+}
+
+/* Panel de Filtros */
+.filter-panel {
+  padding: 1.5rem;
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-border-hover);
+}
+.filter-form { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: flex-end; }
+.filter-group { display: flex; flex-direction: column; gap: 0.25rem; flex: 1 1 180px; }
+.filter-group label { font-size: 0.8rem; color: white; }
+.filter-group select, .filter-group input[type="date"] { width: 100%; padding: 0.6rem; border: 1px solid var(--color-border); border-radius: 4px; background-color: var(--color-background-soft); color: var(--color-text); font-size: 0.9rem; }
+.filter-actions { display: flex; gap: 0.75rem; }
+.action-button { padding: 0.6em 1.2em; font-size: 0.9rem; border-radius: 4px; cursor: pointer; text-decoration: none; border: 1px solid transparent; transition: background-color 0.2s, border-color 0.2s; }
+.action-button.primary { background-color: var(--color-azul); color: white; border-color: var(--color-azul); }
+.action-button.primary:hover { background-color: var(--color-azul); }
+.action-button.secondary { background-color: var(--color-background-mute); color: var(--color-text); border-color: var(--color-border); }
+.action-button.secondary:hover { background-color: var(--color-border); }
+
+
+/* Menú Hamburguesa */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  padding: 10px;
+}
+.hamburger-icon {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: var(--color-text);
+  position: relative;
+  /* Transición para la barra del medio (que desaparece) */
+  transition: background-color 0.3s 0.1s ease;
+}
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-text);
+  transition: transform 0.3s ease, top 0.3s ease;
+}
+.hamburger-icon::before { top: -7px; }
+.hamburger-icon::after { top: 7px; }
+
+.hamburger-icon.is-open {
+  background-color: transparent; /* Oculta la barra del medio */
+}
+
+.hamburger-icon.is-open::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.hamburger-icon.is-open::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+
+/* Diseño Responsivo */
+@media (max-width: 1900px) {
+  .main-nav {
+    gap: 0rem;
+    transform: translateX(-60%);
+  }
+  .search-container input { width: 150px; }
+  nav a { font-size: 1rem; }
+}
+
+@media (max-width: 1250px) {
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    /* Corrección final: reseteamos el transform y la posición */
+    left: 0;
+    transform: none;
+    width: 100%;
+    /* Estilos del desplegable */
+    -webkit-backdrop-filter: blur(60px);
+    backdrop-filter: blur(60px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+  }
+  .main-nav.is-open { display: flex; }
+  .main-nav a {
+    padding: 1rem 0;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    color: var(--color-azul);
+    box-shadow: 0 0px 10px rgba(235, 227, 237, 0.25);
+    border-bottom: 1.5px solid  #87269e ;
+  }
+  .main-nav a:last-child { border-bottom: none; }
+  .menu-toggle { display: block; }
+  .actions-container { margin-left: auto; }
+  .filter-actions { flex-direction: column; gap: 10px; }
+  .filter-actions .action-button { width: 100%; text-align: center; }
+}
+
+@media (max-width: 670px) {
+  .app-title { display: none; }
+}
+
+@media (max-width: 525px) {
+  .actions-container .search-container { display: none; }
+  .search-filter-form { display: flex; width: 100%; }
+  .search-filter-form input { width: 100%; }
+  .user-auth-group .action-button { padding: 6px 10px; font-size: 0.8rem; }
+}
+
+@media (max-width: 308px) {
+  .header-content { height: auto; }
+}
